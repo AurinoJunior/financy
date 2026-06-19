@@ -45,7 +45,8 @@
 - Better Auth (e-mail/senha) + tabelas via Drizzle
 - Páginas `/login` e `/register`; middleware protegendo rotas
 - App shell fiel à referência: sidebar compacta (ícones), topbar "Welcome Back"
-- **✅ Validação:** registrar, login, logout, rota protegida redireciona, layout bate com a referência.
+- **Tema dark/light** com `next-themes` + toggle (default dark)
+- **✅ Validação:** registrar, login, logout, rota protegida redireciona, toggle de tema funciona, layout bate com a referência.
 
 ## Fase 2 — Categorias (Configurações)
 - Schema `category` + migration + seed de categorias padrão pt-BR
