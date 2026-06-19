@@ -22,6 +22,13 @@
       "when": 1781909223714,
       "tag": "0002_marvelous_big_bertha",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781912144580,
+      "tag": "0003_same_pepper_potts",
+      "breakpoints": true
     }
   ]
 }

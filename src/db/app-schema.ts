@@ -71,3 +71,29 @@ export const transaction = pgTable(
 
 export type CsvImport = typeof csvImport.$inferSelect
 export type Transaction = typeof transaction.$inferSelect
+
+// Conta recorrente: valor mensal em centavos, dia de vencimento, essencial ou não.
+export const recurringBill = pgTable(
+  "recurring_bill",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    amount: integer("amount").notNull(), // centavos
+    dueDay: integer("due_day").notNull(), // 1..31
+    essential: boolean("essential").notNull().default(true),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("recurring_bill_userId_idx").on(table.userId)],
+)
+
+export type RecurringBill = typeof recurringBill.$inferSelect

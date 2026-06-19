@@ -26,11 +26,15 @@ async function main() {
   const catName = new Map(cats.map((c) => [c.id, c.name]))
   const start = Date.now()
   const mapping = await categorizeWithAI(txs, cats)
-  console.log(`IA respondeu em ${Date.now() - start}ms · ${mapping.size}/${txs.length} classificadas:\n`)
+  console.log(
+    `IA respondeu em ${Date.now() - start}ms · ${mapping.size}/${txs.length} classificadas:\n`,
+  )
 
   for (const t of txs) {
     const catId = mapping.get(t.id)
-    console.log(`  ${t.description.padEnd(34)} → ${catId ? catName.get(catId) : "— (não classificada)"}`)
+    console.log(
+      `  ${t.description.padEnd(34)} → ${catId ? catName.get(catId) : "— (não classificada)"}`,
+    )
   }
 
   // Persiste (mesma lógica da action), para deixar a demo categorizada.
