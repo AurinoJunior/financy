@@ -4,7 +4,9 @@ let failures = 0
 function check(label: string, got: unknown, expected: unknown) {
   const ok = JSON.stringify(got) === JSON.stringify(expected)
   if (!ok) failures++
-  console.log(`${ok ? "✅" : "❌"} ${label} → ${JSON.stringify(got)}${ok ? "" : ` (esperado ${JSON.stringify(expected)})`}`)
+  console.log(
+    `${ok ? "✅" : "❌"} ${label} → ${JSON.stringify(got)}${ok ? "" : ` (esperado ${JSON.stringify(expected)})`}`,
+  )
 }
 
 // parseBrAmount (centavos com sinal)

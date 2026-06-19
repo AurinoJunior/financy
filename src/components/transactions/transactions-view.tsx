@@ -1,13 +1,12 @@
 "use client"
 
-import { Trash2Icon } from "lucide-react"
+import { SparklesIcon, Trash2Icon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
-import { deleteTransaction } from "@/app/(app)/transacoes/actions"
+import { categorizeUncategorized, deleteTransaction } from "@/app/(app)/transacoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { Category, Transaction } from "@/db/app-schema"
-import { getCategoryIcon } from "@/lib/categories"
 import { formatBRL, formatDateBr } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
@@ -16,6 +15,7 @@ import {
   type Period,
   useTransactionFilters,
 } from "@/stores/transaction-filters"
+import { CategoryPicker } from "./category-picker"
 import { ImportDialog } from "./import-dialog"
 
 function matchesPeriod(dateIso: string, period: Period): boolean {
@@ -45,8 +45,12 @@ export function TransactionsView({
 }) {
   const { period, categoryId, setPeriod, setCategoryId } = useTransactionFilters()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [categorizing, setCategorizing] = useState(false)
 
-  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
+  const uncategorizedCount = useMemo(
+    () => transactions.filter((t) => t.categoryId === null).length,
+    [transactions],
+  )
 
   const filtered = useMemo(() => {
     return transactions.filter((t) => {
@@ -78,6 +82,19 @@ export function TransactionsView({
     toast.success("Transação excluída")
   }
 
+  async function handleCategorize() {
+    setCategorizing(true)
+    const result = await categorizeUncategorized()
+    setCategorizing(false)
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    toast.success(
+      result.count > 0 ? `${result.count} transações categorizadas` : "Nada para categorizar",
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
@@ -85,7 +102,15 @@ export function TransactionsView({
           <h2 className="text-lg font-semibold">Transações</h2>
           <p className="text-sm text-muted-foreground">Importe um extrato e veja seus gastos.</p>
         </div>
-        <ImportDialog />
+        <div className="flex items-center gap-2">
+          {uncategorizedCount > 0 && (
+            <Button variant="outline" onClick={handleCategorize} disabled={categorizing}>
+              <SparklesIcon />
+              {categorizing ? "Categorizando..." : `Categorizar com IA (${uncategorizedCount})`}
+            </Button>
+          )}
+          <ImportDialog />
+        </div>
       </div>
 
       {transactions.length === 0 ? (
@@ -145,8 +170,6 @@ export function TransactionsView({
               </p>
             ) : (
               filtered.map((t) => {
-                const category = t.categoryId ? categoryMap.get(t.categoryId) : undefined
-                const Icon = category ? getCategoryIcon(category.icon) : null
                 return (
                   <div
                     key={t.id}
@@ -157,21 +180,11 @@ export function TransactionsView({
                     </span>
                     <span className="flex-1 truncate text-sm font-medium">{t.description}</span>
 
-                    {category && Icon ? (
-                      <span className="flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-xs">
-                        <span
-                          className="flex size-4 items-center justify-center rounded-full text-white"
-                          style={{ backgroundColor: category.color }}
-                        >
-                          <Icon className="size-2.5" />
-                        </span>
-                        <span className="text-muted-foreground">{category.name}</span>
-                      </span>
-                    ) : (
-                      <span className="shrink-0 text-xs text-muted-foreground/60">
-                        Sem categoria
-                      </span>
-                    )}
+                    <CategoryPicker
+                      transactionId={t.id}
+                      categoryId={t.categoryId}
+                      categories={categories}
+                    />
 
                     <span
                       className={cn(
