@@ -15,6 +15,13 @@
       "when": 1781908310836,
       "tag": "0001_worried_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781909223714,
+      "tag": "0002_marvelous_big_bertha",
+      "breakpoints": true
     }
   ]
 }
