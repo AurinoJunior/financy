@@ -3,7 +3,6 @@
 import { LogOutIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -49,7 +48,6 @@ export function Topbar({ user }: { user: TopbarUser }) {
       </div>
 
       <div className="flex items-center gap-1">
-        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger className="ml-1 cursor-pointer rounded-full outline-none ring-offset-2 ring-offset-background transition-shadow hover:ring-2 hover:ring-ring/40 focus-visible:ring-2 focus-visible:ring-ring">
             <Avatar>
