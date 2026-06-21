@@ -168,6 +168,22 @@ export function TransactionsView({
           </div>
 
           <Card className="gap-0 py-0">
+            <div className="flex items-center gap-3 rounded-t-2xl border-b border-border bg-white/5 px-4 py-3.5">
+              <span className="w-16 shrink-0 text-xs font-medium uppercase tracking-wide text-white">
+                Data
+              </span>
+              <span className="flex-1 text-xs font-medium uppercase tracking-wide text-white">
+                Descrição
+              </span>
+              <span className="w-32 text-xs font-medium uppercase tracking-wide text-white">
+                Categoria
+              </span>
+              <span className="w-24 shrink-0 text-right text-xs font-medium uppercase tracking-wide text-white">
+                Valor
+              </span>
+              <span className="size-7 shrink-0" />
+            </div>
+
             {filtered.length === 0 ? (
               <p className="px-4 py-8 text-center text-sm text-muted-foreground">
                 Nenhuma transação para esse filtro.
