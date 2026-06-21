@@ -1,7 +1,7 @@
 "use client"
 
 import { LogOutIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -29,9 +29,33 @@ function initials(name?: string | null, email?: string | null) {
     .join("")
 }
 
+const PAGE_HEADERS: Record<string, { title: (name: string) => string; subtitle: string }> = {
+  "/": {
+    title: (name) => `Olá, ${name}!`,
+    subtitle: "Vamos ver para onde seu dinheiro foi?",
+  },
+  "/transacoes": {
+    title: () => "Transações",
+    subtitle: "Importe e categorize seus extratos",
+  },
+  "/recorrentes": {
+    title: () => "Contas Recorrentes",
+    subtitle: "Seus compromissos e contas fixas",
+  },
+  "/configuracoes": {
+    title: () => "Configurações",
+    subtitle: "Gerencie suas categorias",
+  },
+}
+
 export function Topbar({ user }: { user: TopbarUser }) {
   const router = useRouter()
-  const firstName = user.name?.trim().split(/\s+/)[0] ?? "de volta"
+  const pathname = usePathname()
+  const firstName = user.name?.trim().split(/\s+/)[0] ?? "você"
+
+  const header = PAGE_HEADERS[pathname] ?? PAGE_HEADERS["/"]
+  const title = header.title(firstName)
+  const { subtitle } = header
 
   async function handleSignOut() {
     await signOut()
@@ -43,16 +67,18 @@ export function Topbar({ user }: { user: TopbarUser }) {
   return (
     <header className="flex items-center justify-between gap-4 px-6 py-5">
       <div>
-        <h1 className="text-2xl font-bold leading-tight">Olá, {firstName}!</h1>
-        <p className="text-sm text-muted-foreground">para onde vai meu dinheiro?</p>
+        <h1 className="text-2xl font-bold leading-tight">{title}</h1>
+        <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="flex items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger className="ml-1 cursor-pointer rounded-full outline-none ring-offset-2 ring-offset-background transition-shadow hover:ring-2 hover:ring-ring/40 focus-visible:ring-2 focus-visible:ring-ring">
-            <Avatar>
+            <Avatar size="lg">
               <AvatarImage src={user.image ?? undefined} alt={user.name ?? "Avatar"} />
-              <AvatarFallback>{initials(user.name, user.email)}</AvatarFallback>
+              <AvatarFallback className="bg-primary font-semibold text-primary-foreground">
+                {initials(user.name, user.email)}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

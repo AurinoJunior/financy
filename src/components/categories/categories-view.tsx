@@ -51,11 +51,7 @@ export function CategoriesView({ categories }: { categories: Category[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h2 className="text-lg font-semibold">Categorias</h2>
-          <p className="text-sm text-muted-foreground">Organize para onde vai o seu dinheiro.</p>
-        </div>
+      <div className="flex items-center justify-end gap-4">
         <Button onClick={openCreate}>
           <PlusIcon />
           Nova categoria
