@@ -12,7 +12,9 @@ export type CategorySlice = {
 export type MonthBar = { key: string; label: string; total: number }
 
 export type DashboardData = {
+  currentMonth: string
   monthLabel: string
+  availableMonths: string[]
   expenses: number
   income: number
   balance: number
@@ -39,13 +41,26 @@ export function computeDashboard(
   transactions: Transaction[],
   bills: RecurringBill[],
   categories: Category[],
+  selectedMonth?: string,
 ): DashboardData {
   const now = new Date()
-  const currentKey = monthKey(now)
-  const monthLabel = now.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+  const defaultKey = monthKey(now)
+  const currentMonth = selectedMonth ?? defaultKey
+
+  const [year, month] = currentMonth.split("-").map(Number)
+  const currentDate = new Date(year, month - 1, 1)
+  const monthLabel = currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+
+  const availableMonths = [...new Set(transactions.map((t) => t.date.substring(0, 7)))]
+    .sort()
+    .reverse()
+
+  if (!availableMonths.includes(currentMonth) && availableMonths.length > 0) {
+    availableMonths.unshift(currentMonth)
+  }
 
   const categoryById = new Map(categories.map((c) => [c.id, c]))
-  const monthTx = transactions.filter((t) => t.date.startsWith(currentKey))
+  const monthTx = transactions.filter((t) => t.date.startsWith(currentMonth))
 
   let expenses = 0
   let income = 0
@@ -74,10 +89,10 @@ export function computeDashboard(
     })
     .sort((a, b) => b.total - a.total)
 
-  // Últimos 6 meses (do mais antigo ao atual).
+  // Últimos 6 meses a partir do mês selecionado (do mais antigo ao atual).
   const byMonth: MonthBar[] = []
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const d = new Date(year, month - 1 - i, 1)
     const key = monthKey(d)
     const total = transactions
       .filter((t) => t.type === "expense" && t.date.startsWith(key))
@@ -93,8 +108,12 @@ export function computeDashboard(
     else recurringNonEssential += b.amount
   }
 
+  const recentInMonth = [...monthTx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6)
+
   return {
+    currentMonth,
     monthLabel,
+    availableMonths,
     expenses,
     income,
     balance: income - expenses,
@@ -103,7 +122,7 @@ export function computeDashboard(
     recurringTotal: recurringEssential + recurringNonEssential,
     byCategory,
     byMonth,
-    recent: transactions.slice(0, 6),
+    recent: recentInMonth,
     hasData: transactions.length > 0,
   }
 }

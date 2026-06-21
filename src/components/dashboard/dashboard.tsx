@@ -1,5 +1,6 @@
 import { ArrowDownLeftIcon, ArrowUpRightIcon, RepeatIcon, WalletIcon } from "lucide-react"
 import Link from "next/link"
+import { MonthSelector } from "@/components/dashboard/month-selector"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getCategoryIcon } from "@/lib/categories"
@@ -27,7 +28,9 @@ export function Dashboard({ data }: { data: DashboardData }) {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground capitalize">{data.monthLabel}</p>
+      <div className="flex justify-end">
+        <MonthSelector availableMonths={data.availableMonths} currentMonth={data.currentMonth} />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard

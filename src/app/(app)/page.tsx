@@ -5,11 +5,17 @@ import { category, recurringBill, transaction } from "@/db/schema"
 import { computeDashboard } from "@/lib/dashboard"
 import { getSession } from "@/lib/get-session"
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>
+}) {
   const session = await getSession()
   if (!session) return null
 
+  const { month } = await searchParams
   const userId = session.user.id
+
   const [transactions, bills, categories] = await Promise.all([
     db
       .select()
@@ -20,6 +26,6 @@ export default async function DashboardPage() {
     db.select().from(category).where(eq(category.userId, userId)),
   ])
 
-  const data = computeDashboard(transactions, bills, categories)
+  const data = computeDashboard(transactions, bills, categories, month)
   return <Dashboard data={data} />
 }

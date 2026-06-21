@@ -91,7 +91,7 @@
   --foreground: oklch(0.95 0 0);
   --card: oklch(0.17 0.03 252);
   --card-foreground: oklch(0.95 0 0);
-  --popover: oklch(0.17 0.03 252);
+  --popover: oklch(0.17 0.03 252 / 0.9);
   --popover-foreground: oklch(0.95 0 0);
   --primary: oklch(0.87 0.21 128);
   --primary-foreground: oklch(0.21 0.02 128);
@@ -134,5 +134,15 @@
   }
   html {
     @apply font-sans;
+  }
+  [data-slot="card"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: -1;
+    pointer-events: none;
   }
 }
