@@ -119,7 +119,7 @@ export function ImportDialog() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
+      <Button className="h-10" onClick={() => setOpen(true)}>
         <UploadIcon />
         Importar CSV
       </Button>
