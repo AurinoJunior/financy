@@ -131,11 +131,15 @@
     background-image:
       radial-gradient(ellipse 70% 55% at 15% 0%, oklch(0.28 0.12 255 / 0.55) 0%, transparent 100%),
       radial-gradient(ellipse 55% 45% at 85% 100%, oklch(0.22 0.1 265 / 0.4) 0%, transparent 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
   }
   html {
     @apply font-sans;
   }
-  [data-slot="card"]::before {
+  [data-slot="card"]::before,
+  .glass-blur::before {
     content: "";
     position: absolute;
     inset: 0;

@@ -1,6 +1,12 @@
 "use client"
 
-import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon, Trash2Icon } from "lucide-react"
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  SearchIcon,
+  SparklesIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { categorizeUncategorized, deleteTransaction } from "@/app/(app)/transacoes/actions"
@@ -8,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { FilterSelect } from "@/components/ui/filter-select"
 import type { Category, Transaction } from "@/db/app-schema"
+import { ACCOUNT_TYPE_LABELS } from "@/lib/banks"
 import { formatBRL, formatDateBr } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
@@ -16,6 +23,7 @@ import {
   type Period,
   useTransactionFilters,
 } from "@/stores/transaction-filters"
+import { BankIcon } from "./bank-icon"
 import { CategoryPicker } from "./category-picker"
 import { ImportDialog } from "./import-dialog"
 
@@ -48,17 +56,18 @@ export function TransactionsView({
   transactions: Transaction[]
   categories: Category[]
 }) {
-  const PAGE_SIZE = 15
+  const PAGE_SIZE = 10
 
   const { period, categoryId, setPeriod, setCategoryId } = useTransactionFilters()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [categorizing, setCategorizing] = useState(false)
   const [page, setPage] = useState(1)
+  const [search, setSearch] = useState("")
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset page when filters change
   useEffect(() => {
     setPage(1)
-  }, [period, categoryId])
+  }, [period, categoryId, search])
 
   const uncategorizedCount = useMemo(
     () => transactions.filter((t) => t.categoryId === null).length,
@@ -66,13 +75,17 @@ export function TransactionsView({
   )
 
   const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
     return transactions.filter((t) => {
       if (!matchesPeriod(t.date, period)) return false
-      if (categoryId === "all") return true
-      if (categoryId === "none") return t.categoryId === null
-      return t.categoryId === categoryId
+      if (categoryId !== "all") {
+        if (categoryId === "none" && t.categoryId !== null) return false
+        if (categoryId !== "none" && t.categoryId !== categoryId) return false
+      }
+      if (q && !t.description.toLowerCase().includes(q)) return false
+      return true
     })
-  }, [transactions, period, categoryId])
+  }, [transactions, period, categoryId, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const safePage = Math.min(page, totalPages)
@@ -117,8 +130,19 @@ export function TransactionsView({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
+        <div className="glass-blur flex w-[420px] shrink-0 items-center gap-2 rounded-xl border border-white/8 bg-white/5 px-3 py-2 shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)] focus-within:border-white/20">
+          <SearchIcon className="size-[14px] shrink-0 text-white" />
+          <input
+            type="text"
+            placeholder="Pesquisar por descrição..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 bg-transparent text-sm text-white placeholder:text-muted-foreground outline-none"
+          />
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
           {uncategorizedCount > 0 && (
             <Button variant="outline" onClick={handleCategorize} disabled={categorizing}>
               <SparklesIcon />
@@ -154,7 +178,7 @@ export function TransactionsView({
               ]}
             />
 
-            <div className="ml-auto flex items-center gap-4 text-sm">
+            <div className="ml-auto flex items-center gap-5 text-sm">
               <span className="text-muted-foreground">
                 {filtered.length} {filtered.length === 1 ? "transação" : "transações"}
               </span>
@@ -168,17 +192,18 @@ export function TransactionsView({
           </div>
 
           <Card className="gap-0 py-0">
-            <div className="flex items-center gap-3 rounded-t-2xl border-b border-border bg-white/5 px-4 py-3.5">
-              <span className="w-16 shrink-0 text-xs font-medium uppercase tracking-wide text-white">
+            <div className="flex items-center gap-5 rounded-t-2xl border-b border-border bg-white/5 px-4 py-3.5">
+              <span className="w-10 shrink-0" />
+              <span className="flex-[2] min-w-0 text-xs font-medium uppercase tracking-wide text-white">
+                Descrição
+              </span>
+              <span className="flex-1 text-xs font-medium uppercase tracking-wide text-white">
                 Data
               </span>
               <span className="flex-1 text-xs font-medium uppercase tracking-wide text-white">
-                Descrição
-              </span>
-              <span className="w-32 text-xs font-medium uppercase tracking-wide text-white">
                 Categoria
               </span>
-              <span className="w-24 shrink-0 text-right text-xs font-medium uppercase tracking-wide text-white">
+              <span className="flex-1 text-right text-xs font-medium uppercase tracking-wide text-white">
                 Valor
               </span>
               <span className="size-7 shrink-0" />
@@ -192,23 +217,39 @@ export function TransactionsView({
               paginated.map((t) => (
                 <div
                   key={t.id}
-                  className="group flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
+                  className="group flex items-center gap-5 border-b border-border px-4 py-3 last:border-b-0"
                 >
-                  <span className="w-16 shrink-0 text-xs text-muted-foreground">
-                    {formatDateBr(t.date)}
-                  </span>
-                  <span className="flex-1 truncate text-sm font-medium">{t.description}</span>
+                  <BankIcon bank={t.bank} size={40} />
 
-                  <CategoryPicker
-                    transactionId={t.id}
-                    categoryId={t.categoryId}
-                    categories={categories}
-                  />
+                  <div className="flex-[2] min-w-0">
+                    <p className="truncate text-sm font-medium">{t.description}</p>
+                    {t.accountType && (
+                      <p className="text-xs font-bold text-muted-foreground">
+                        {ACCOUNT_TYPE_LABELS[t.accountType as "credit" | "debit"]}
+                      </p>
+                    )}
+                  </div>
+
+                  <span className="flex-1 text-base text-muted-foreground">
+                    {new Date(`${t.date}T12:00:00`).toLocaleDateString("pt-BR", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+
+                  <div className="flex-1">
+                    <CategoryPicker
+                      transactionId={t.id}
+                      categoryId={t.categoryId}
+                      categories={categories}
+                    />
+                  </div>
 
                   <span
                     className={cn(
-                      "w-24 shrink-0 text-right text-sm font-semibold tabular-nums",
-                      t.type === "income" && "text-primary",
+                      "flex-1 text-right text-sm font-semibold tabular-nums",
+                      t.type === "expense" ? "text-red-400" : "text-white",
                     )}
                   >
                     {t.type === "expense" ? "-" : "+"}

@@ -17,13 +17,13 @@ export async function importTransactions(payload: ImportPayload): Promise<Import
   const parsed = importPayloadSchema.safeParse(payload)
   if (!parsed.success) return { ok: false, error: "Arquivo inválido" }
 
-  const { filename, rows } = parsed.data
+  const { filename, bank, accountType, rows } = parsed.data
   const userId = session.user.id
 
   await db.transaction(async (tx) => {
     const [imp] = await tx
       .insert(csvImport)
-      .values({ userId, filename, rowCount: rows.length })
+      .values({ userId, filename, rowCount: rows.length, bank, accountType })
       .returning()
 
     await tx.insert(transaction).values(
@@ -33,6 +33,8 @@ export async function importTransactions(payload: ImportPayload): Promise<Import
         description: r.description,
         amount: r.amount,
         type: r.type,
+        bank: bank ?? null,
+        accountType: accountType ?? null,
         importId: imp.id,
       })),
     )

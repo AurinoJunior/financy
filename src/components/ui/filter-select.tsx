@@ -28,7 +28,7 @@ export function FilterSelect({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm text-white shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)] backdrop-blur-xl outline-none">
+      <DropdownMenuTrigger className="glass-blur flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm text-white shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)] outline-none">
         {triggerLabel ?? selected?.label ?? value}
         <ChevronDownIcon className="size-3.5" />
       </DropdownMenuTrigger>

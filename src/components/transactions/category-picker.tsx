@@ -41,7 +41,7 @@ export function CategoryPicker({
       <DropdownMenuTrigger
         disabled={pending}
         className={cn(
-          "flex shrink-0 items-center gap-1.5 rounded-full px-2 py-1 text-xs transition-colors hover:bg-muted",
+          "flex cursor-pointer shrink-0 items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1.5 text-sm transition-colors hover:bg-white/10",
           pending && "opacity-50",
         )}
       >

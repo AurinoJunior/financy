@@ -14,6 +14,8 @@ export type ParsedRow = z.infer<typeof parsedRowSchema>
 
 export const importPayloadSchema = z.object({
   filename: z.string().trim().min(1).max(200),
+  bank: z.string().trim().optional(),
+  accountType: z.enum(["credit", "debit"]).optional(),
   rows: z.array(parsedRowSchema).min(1, "Nenhuma transação para importar").max(5000),
 })
 

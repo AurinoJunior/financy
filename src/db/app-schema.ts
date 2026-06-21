@@ -38,6 +38,8 @@ export const csvImport = pgTable("csv_import", {
     .references(() => user.id, { onDelete: "cascade" }),
   filename: text("filename").notNull(),
   rowCount: integer("row_count").notNull().default(0),
+  bank: text("bank"), // e.g. 'nubank'
+  accountType: text("account_type"), // 'credit' | 'debit'
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
@@ -55,6 +57,8 @@ export const transaction = pgTable(
     description: text("description").notNull(),
     amount: integer("amount").notNull(), // centavos, sempre positivo
     type: text("type").notNull(), // 'income' | 'expense'
+    bank: text("bank"), // e.g. 'nubank'
+    accountType: text("account_type"), // 'credit' | 'debit'
     categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
     importId: text("import_id").references(() => csvImport.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
