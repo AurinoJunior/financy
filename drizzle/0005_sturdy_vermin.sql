@@ -1,0 +1,1 @@
+ALTER TABLE "recurring_bill" ADD COLUMN "payment_type" text;

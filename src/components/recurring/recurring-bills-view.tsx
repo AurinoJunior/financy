@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { CalendarIcon, EyeIcon, EyeOffIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { deleteRecurringBill, toggleRecurringBill } from "@/app/(app)/recorrentes/actions"
@@ -18,6 +18,7 @@ import {
 import type { RecurringBill } from "@/db/app-schema"
 import { formatBRL } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { PAYMENT_TYPE_LABELS, type PaymentType } from "@/lib/validations/recurring-bill"
 import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
 import { RecurringBillDialog } from "./recurring-bill-dialog"
 
@@ -107,9 +108,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
           (group) =>
             group.items.length > 0 && (
               <section key={group.label} className="space-y-3">
-                <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {group.label}
-                </h3>
+                <h3 className="text-base font-medium text-white">{group.label}</h3>
                 <Card className="gap-0 py-0">
                   {group.items
                     .slice()
@@ -122,15 +121,25 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
                           !bill.active && "opacity-50",
                         )}
                       >
-                        <input
-                          type="checkbox"
-                          checked={bill.active}
+                        <button
+                          type="button"
                           disabled={busyId === bill.id}
-                          onChange={() => handleToggle(bill)}
-                          aria-label="Ativa"
-                          className="size-4 shrink-0 accent-primary"
-                        />
+                          onClick={() => handleToggle(bill)}
+                          aria-label={bill.active ? "Ocultar da soma" : "Incluir na soma"}
+                          className="cursor-pointer shrink-0 text-muted-foreground transition-colors hover:text-white disabled:pointer-events-none disabled:opacity-50"
+                        >
+                          {bill.active ? (
+                            <EyeIcon className="size-4" />
+                          ) : (
+                            <EyeOffIcon className="size-4" />
+                          )}
+                        </button>
                         <span className="flex-1 truncate text-sm font-medium">{bill.name}</span>
+                        {bill.paymentType && (
+                          <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs text-muted-foreground">
+                            {PAYMENT_TYPE_LABELS[bill.paymentType as PaymentType]}
+                          </span>
+                        )}
                         <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
                           <CalendarIcon className="size-3" />
                           dia {bill.dueDay}

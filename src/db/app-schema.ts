@@ -91,6 +91,7 @@ export const recurringBill = pgTable(
     dueDay: integer("due_day").notNull(), // 1..31
     essential: boolean("essential").notNull().default(true),
     active: boolean("active").notNull().default(true),
+    paymentType: text("payment_type"), // 'pix' | 'boleto' | 'credit' | 'debit_auto'
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

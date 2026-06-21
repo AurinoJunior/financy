@@ -20,6 +20,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { parseBrAmount } from "@/lib/csv"
 import { cn } from "@/lib/utils"
+import {
+  PAYMENT_TYPE_LABELS,
+  PAYMENT_TYPES,
+  type PaymentType,
+} from "@/lib/validations/recurring-bill"
 import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
 
 const formSchema = z.object({
@@ -31,6 +36,7 @@ const formSchema = z.object({
   dueDay: z.number().int().min(1).max(31),
   essential: z.boolean(),
   active: z.boolean(),
+  paymentType: z.enum(PAYMENT_TYPES).optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -41,6 +47,7 @@ const emptyValues: FormValues = {
   dueDay: 5,
   essential: true,
   active: true,
+  paymentType: undefined,
 }
 
 function centsToInput(cents: number): string {
@@ -74,6 +81,7 @@ export function RecurringBillDialog() {
             dueDay: editing.dueDay,
             essential: editing.essential,
             active: editing.active,
+            paymentType: (editing.paymentType as PaymentType) ?? undefined,
           }
         : emptyValues,
     )
@@ -82,6 +90,7 @@ export function RecurringBillDialog() {
   const dueDay = watch("dueDay")
   const essential = watch("essential")
   const active = watch("active")
+  const paymentType = watch("paymentType")
 
   async function onSubmit(values: FormValues) {
     const cents = parseBrAmount(values.amount)
@@ -93,6 +102,7 @@ export function RecurringBillDialog() {
       dueDay: values.dueDay,
       essential: values.essential,
       active: values.active,
+      paymentType: values.paymentType,
     }
 
     const result = editing
@@ -160,7 +170,7 @@ export function RecurringBillDialog() {
                   type="button"
                   onClick={() => setValue("essential", opt.value, { shouldValidate: true })}
                   className={cn(
-                    "rounded-lg border border-border px-3 py-2 text-sm transition-colors",
+                    "rounded-lg border border-border px-3 py-2 text-base font-bold transition-colors",
                     essential === opt.value
                       ? "border-primary bg-primary/10 text-foreground"
                       : "text-muted-foreground hover:bg-muted",
@@ -170,6 +180,27 @@ export function RecurringBillDialog() {
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="paymentType">Forma de pagamento</Label>
+            <select
+              id="paymentType"
+              value={paymentType ?? ""}
+              onChange={(e) =>
+                setValue("paymentType", (e.target.value as PaymentType) || undefined, {
+                  shouldValidate: true,
+                })
+              }
+              className={selectClass}
+            >
+              <option value="">Selecione...</option>
+              {PAYMENT_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {PAYMENT_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </select>
           </div>
 
           <label className="flex items-center gap-2 text-sm">

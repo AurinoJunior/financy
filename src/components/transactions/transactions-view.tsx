@@ -144,7 +144,7 @@ export function TransactionsView({
 
         <div className="ml-auto flex items-center gap-2">
           {uncategorizedCount > 0 && (
-            <Button variant="outline" className="h-10" onClick={handleCategorize} disabled={categorizing}>
+            <Button variant="outline" onClick={handleCategorize} disabled={categorizing}>
               <SparklesIcon />
               {categorizing ? "Categorizando..." : `Categorizar com IA (${uncategorizedCount})`}
             </Button>
