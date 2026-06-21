@@ -1,11 +1,12 @@
 "use client"
 
-import { SparklesIcon, Trash2Icon } from "lucide-react"
-import { useMemo, useState } from "react"
+import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon, Trash2Icon } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 import { categorizeUncategorized, deleteTransaction } from "@/app/(app)/transacoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { FilterSelect } from "@/components/ui/filter-select"
 import type { Category, Transaction } from "@/db/app-schema"
 import { formatBRL, formatDateBr } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -33,8 +34,12 @@ function matchesPeriod(dateIso: string, period: Period): boolean {
   return dateIso >= monthStart(new Date(y, m - 2, 1)) // last_3_months
 }
 
-const selectClass =
-  "h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
+function getPageNumbers(current: number, total: number): (number | "...")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  if (current <= 4) return [1, 2, 3, 4, 5, "...", total]
+  if (current >= total - 3) return [1, "...", total - 4, total - 3, total - 2, total - 1, total]
+  return [1, "...", current - 1, current, current + 1, "...", total]
+}
 
 export function TransactionsView({
   transactions,
@@ -43,9 +48,17 @@ export function TransactionsView({
   transactions: Transaction[]
   categories: Category[]
 }) {
+  const PAGE_SIZE = 15
+
   const { period, categoryId, setPeriod, setCategoryId } = useTransactionFilters()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [categorizing, setCategorizing] = useState(false)
+  const [page, setPage] = useState(1)
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [period, categoryId])
 
   const uncategorizedCount = useMemo(
     () => transactions.filter((t) => t.categoryId === null).length,
@@ -60,6 +73,13 @@ export function TransactionsView({
       return t.categoryId === categoryId
     })
   }, [transactions, period, categoryId])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const paginated = useMemo(
+    () => filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE),
+    [filtered, safePage],
+  )
 
   const totals = useMemo(() => {
     let expense = 0
@@ -118,33 +138,21 @@ export function TransactionsView({
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-3">
-            <select
-              aria-label="Período"
+            <FilterSelect
               value={period}
-              onChange={(e) => setPeriod(e.target.value as Period)}
-              className={selectClass}
-            >
-              {PERIODS.map((p) => (
-                <option key={p} value={p}>
-                  {PERIOD_LABELS[p]}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setPeriod(v as Period)}
+              options={PERIODS.map((p) => ({ value: p, label: PERIOD_LABELS[p] }))}
+            />
 
-            <select
-              aria-label="Categoria"
+            <FilterSelect
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className={selectClass}
-            >
-              <option value="all">Todas as categorias</option>
-              <option value="none">Sem categoria</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              onChange={setCategoryId}
+              options={[
+                { value: "all", label: "Todas as categorias" },
+                { value: "none", label: "Sem categoria" },
+                ...categories.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
 
             <div className="ml-auto flex items-center gap-4 text-sm">
               <span className="text-muted-foreground">
@@ -165,48 +173,97 @@ export function TransactionsView({
                 Nenhuma transação para esse filtro.
               </p>
             ) : (
-              filtered.map((t) => {
-                return (
-                  <div
-                    key={t.id}
-                    className="group flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
+              paginated.map((t) => (
+                <div
+                  key={t.id}
+                  className="group flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
+                >
+                  <span className="w-16 shrink-0 text-xs text-muted-foreground">
+                    {formatDateBr(t.date)}
+                  </span>
+                  <span className="flex-1 truncate text-sm font-medium">{t.description}</span>
+
+                  <CategoryPicker
+                    transactionId={t.id}
+                    categoryId={t.categoryId}
+                    categories={categories}
+                  />
+
+                  <span
+                    className={cn(
+                      "w-24 shrink-0 text-right text-sm font-semibold tabular-nums",
+                      t.type === "income" && "text-primary",
+                    )}
                   >
-                    <span className="w-16 shrink-0 text-xs text-muted-foreground">
-                      {formatDateBr(t.date)}
-                    </span>
-                    <span className="flex-1 truncate text-sm font-medium">{t.description}</span>
+                    {t.type === "expense" ? "-" : "+"}
+                    {formatBRL(t.amount)}
+                  </span>
 
-                    <CategoryPicker
-                      transactionId={t.id}
-                      categoryId={t.categoryId}
-                      categories={categories}
-                    />
-
-                    <span
-                      className={cn(
-                        "w-24 shrink-0 text-right text-sm font-semibold tabular-nums",
-                        t.type === "income" && "text-primary",
-                      )}
-                    >
-                      {t.type === "expense" ? "-" : "+"}
-                      {formatBRL(t.amount)}
-                    </span>
-
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Excluir"
-                      disabled={deletingId === t.id}
-                      onClick={() => handleDelete(t.id)}
-                      className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <Trash2Icon />
-                    </Button>
-                  </div>
-                )
-              })
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Excluir"
+                    disabled={deletingId === t.id}
+                    onClick={() => handleDelete(t.id)}
+                    className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <Trash2Icon />
+                  </Button>
+                </div>
+              ))
             )}
           </Card>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between text-base text-white">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={safePage === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeftIcon />
+                </Button>
+
+                {getPageNumbers(safePage, totalPages).map((p, i) =>
+                  p === "..." ? (
+                    <span
+                      key={i < totalPages / 2 ? "ellipsis-left" : "ellipsis-right"}
+                      className="px-1"
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <Button
+                      key={p}
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setPage(p)}
+                      className={cn(safePage === p && "bg-white/8 text-foreground")}
+                    >
+                      {p}
+                    </Button>
+                  ),
+                )}
+
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  disabled={safePage === totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                  aria-label="Próxima página"
+                >
+                  <ChevronRightIcon />
+                </Button>
+              </div>
+
+              <span>
+                mostrando {Math.min(safePage * PAGE_SIZE, filtered.length)} de {filtered.length}
+              </span>
+            </div>
+          )}
         </>
       )}
     </div>
