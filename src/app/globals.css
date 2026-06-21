@@ -138,6 +138,20 @@
   html {
     @apply font-sans;
   }
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(1 0 0 / 0.15);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(1 0 0 / 0.28);
+  }
+
   [data-slot="card"]::before,
   .glass-blur::before {
     content: "";
