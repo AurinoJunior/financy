@@ -65,7 +65,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-end gap-4">
         <Button onClick={openCreate}>
           <PlusIcon />
@@ -75,21 +75,25 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader>
-            <CardDescription>Essenciais / mês</CardDescription>
-            <CardTitle className="text-2xl">{formatBRL(totals.essential)}</CardTitle>
+          <CardHeader className="items-center text-center p-4">
+            <CardTitle className="text-[32px] font-black">{formatBRL(totals.essential)}</CardTitle>
+            <CardDescription>Essenciais</CardDescription>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader>
-            <CardDescription>Não essenciais / mês</CardDescription>
-            <CardTitle className="text-2xl">{formatBRL(totals.nonEssential)}</CardTitle>
+          <CardHeader className="items-center text-center p-4">
+            <CardTitle className="text-[32px] font-black">
+              {formatBRL(totals.nonEssential)}
+            </CardTitle>
+            <CardDescription>Não essenciais</CardDescription>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader>
-            <CardDescription>Total / mês</CardDescription>
-            <CardTitle className="text-2xl text-primary">{formatBRL(totals.total)}</CardTitle>
+          <CardHeader className="items-center text-center p-4">
+            <CardTitle className="text-[32px] font-black text-primary">
+              {formatBRL(totals.total)}
+            </CardTitle>
+            <CardDescription>Total</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -123,7 +127,9 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
                       >
                         {/* top row: name + actions */}
                         <div className="flex items-start justify-between gap-2">
-                          <span className="flex-1 truncate text-base font-semibold text-muted-foreground">{bill.name}</span>
+                          <span className="flex-1 truncate text-base font-semibold text-muted-foreground">
+                            {bill.name}
+                          </span>
                           <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                             <Button
                               variant="ghost"
