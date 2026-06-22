@@ -16,9 +16,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { FilterSelect } from "@/components/ui/filter-select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { parseBrAmount } from "@/lib/csv"
+import { maskCurrencyInput } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import {
   PAYMENT_TYPE_LABELS,
@@ -51,11 +53,21 @@ const emptyValues: FormValues = {
 }
 
 function centsToInput(cents: number): string {
-  return (cents / 100).toFixed(2).replace(".", ",")
+  return (cents / 100).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
 }
 
-const selectClass =
-  "h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
+const DUE_DAY_OPTIONS = Array.from({ length: 31 }, (_, i) => ({
+  value: String(i + 1),
+  label: `Dia ${i + 1}`,
+}))
+
+const PAYMENT_OPTIONS = [
+  { value: "", label: "Selecione..." },
+  ...PAYMENT_TYPES.map((t) => ({ value: t, label: PAYMENT_TYPE_LABELS[t] })),
+]
 
 export function RecurringBillDialog() {
   const { open, editing, setOpen, close } = useRecurringBillDialog()
@@ -91,6 +103,7 @@ export function RecurringBillDialog() {
   const essential = watch("essential")
   const active = watch("active")
   const paymentType = watch("paymentType")
+  const amount = watch("amount")
 
   async function onSubmit(values: FormValues) {
     const cents = parseBrAmount(values.amount)
@@ -136,25 +149,25 @@ export function RecurringBillDialog() {
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
               <Label htmlFor="amount">Valor (R$)</Label>
-              <Input id="amount" inputMode="decimal" placeholder="0,00" {...register("amount")} />
+              <Input
+                id="amount"
+                inputMode="numeric"
+                placeholder="0,00"
+                value={amount}
+                onChange={(e) =>
+                  setValue("amount", maskCurrencyInput(e.target.value), { shouldValidate: true })
+                }
+              />
               {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="dueDay">Vence dia</Label>
-              <select
-                id="dueDay"
-                value={dueDay}
-                onChange={(e) =>
-                  setValue("dueDay", Number(e.target.value), { shouldValidate: true })
-                }
-                className={selectClass}
-              >
-                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
+              <Label>Vence dia</Label>
+              <FilterSelect
+                value={String(dueDay)}
+                onChange={(v) => setValue("dueDay", Number(v), { shouldValidate: true })}
+                options={DUE_DAY_OPTIONS}
+                triggerLabel={`Dia ${dueDay}`}
+              />
             </div>
           </div>
 
@@ -170,7 +183,7 @@ export function RecurringBillDialog() {
                   type="button"
                   onClick={() => setValue("essential", opt.value, { shouldValidate: true })}
                   className={cn(
-                    "rounded-lg border border-border px-3 py-2 text-base font-bold transition-colors",
+                    "cursor-pointer rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors",
                     essential === opt.value
                       ? "border-primary bg-primary/10 text-foreground"
                       : "text-muted-foreground hover:bg-muted",
@@ -183,24 +196,15 @@ export function RecurringBillDialog() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="paymentType">Forma de pagamento</Label>
-            <select
-              id="paymentType"
+            <Label>Forma de pagamento</Label>
+            <FilterSelect
               value={paymentType ?? ""}
-              onChange={(e) =>
-                setValue("paymentType", (e.target.value as PaymentType) || undefined, {
-                  shouldValidate: true,
-                })
+              onChange={(v) =>
+                setValue("paymentType", (v as PaymentType) || undefined, { shouldValidate: true })
               }
-              className={selectClass}
-            >
-              <option value="">Selecione...</option>
-              {PAYMENT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {PAYMENT_TYPE_LABELS[t]}
-                </option>
-              ))}
-            </select>
+              options={PAYMENT_OPTIONS}
+              triggerLabel={paymentType ? PAYMENT_TYPE_LABELS[paymentType] : "Selecione..."}
+            />
           </div>
 
           <label className="flex items-center gap-2 text-sm">
