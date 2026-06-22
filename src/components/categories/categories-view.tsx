@@ -50,7 +50,7 @@ export function CategoriesView({ categories }: { categories: Category[] }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-end gap-4">
         <Button onClick={openCreate}>
           <PlusIcon />
@@ -74,7 +74,7 @@ export function CategoriesView({ categories }: { categories: Category[] }) {
               <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {CATEGORY_TYPE_LABELS[type]}
               </h3>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {items.map((category) => {
                   const Icon = getCategoryIcon(category.icon)
                   return (

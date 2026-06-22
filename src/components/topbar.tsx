@@ -40,11 +40,11 @@ const PAGE_HEADERS: Record<string, { title: (name: string) => string; subtitle: 
   },
   "/recorrentes": {
     title: () => "Contas Recorrentes",
-    subtitle: "Seus compromissos e contas fixas",
+    subtitle: "Seus compromissos e contas fixas do mês",
   },
   "/configuracoes": {
     title: () => "Configurações",
-    subtitle: "Gerencie suas categorias",
+    subtitle: "Gerencie suas categorias e seu planejamento financeiro",
   },
 }
 
@@ -65,7 +65,7 @@ export function Topbar({ user }: { user: TopbarUser }) {
   }
 
   return (
-    <header className="flex items-center justify-between gap-4 px-6 py-5">
+    <header className="flex items-center justify-between gap-4 p-8">
       <div>
         <h1 className="text-2xl font-bold leading-tight">{title}</h1>
         <p className="text-sm text-muted-foreground">{subtitle}</p>

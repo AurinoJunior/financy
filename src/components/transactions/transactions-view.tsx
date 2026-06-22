@@ -129,7 +129,7 @@ export function TransactionsView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center gap-4">
         <div className="glass-blur flex h-10 w-[420px] shrink-0 items-center gap-2 rounded-xl border border-white/8 bg-white/5 px-3 shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)] focus-within:border-white/20">
           <SearchIcon className="size-[14px] shrink-0 text-white" />

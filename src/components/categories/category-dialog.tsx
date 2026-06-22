@@ -103,7 +103,7 @@ export function CategoryDialog() {
                   type="button"
                   onClick={() => setValue("type", t, { shouldValidate: true })}
                   className={cn(
-                    "rounded-lg border border-border px-3 py-2 text-sm transition-colors",
+                    "rounded-lg border border-border px-3 py-2 text-sm transition-colors cursor-pointer",
                     type === t
                       ? "border-primary bg-primary/10 text-foreground"
                       : "text-muted-foreground hover:bg-muted",
@@ -126,7 +126,7 @@ export function CategoryDialog() {
                   onClick={() => setValue("color", c, { shouldValidate: true })}
                   style={{ backgroundColor: c }}
                   className={cn(
-                    "size-7 rounded-full ring-offset-2 ring-offset-background transition-transform hover:scale-110",
+                    "size-7 rounded-full ring-offset-2 ring-offset-background transition-transform hover:scale-110 cursor-pointer",
                     color === c && "ring-2 ring-ring",
                   )}
                 />
@@ -146,11 +146,11 @@ export function CategoryDialog() {
                     aria-label={`Ícone ${key}`}
                     onClick={() => setValue("icon", key, { shouldValidate: true })}
                     className={cn(
-                      "flex aspect-square items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted",
+                      "flex aspect-square items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted cursor-pointer",
                       icon === key && "bg-primary/15 text-foreground ring-1 ring-primary",
                     )}
                   >
-                    <Icon className="size-4" />
+                    <Icon className="size-6" />
                   </button>
                 )
               })}
