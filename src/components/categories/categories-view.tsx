@@ -67,6 +67,8 @@ export function CategoriesView({ categories }: { categories: Category[] }) {
         </Card>
       )}
 
+      <h2 className="text-2xl font-semibold">Categorias</h2>
+
       {groups.map(
         ({ type, items }) =>
           items.length > 0 && (
@@ -112,8 +114,12 @@ export function CategoriesView({ categories }: { categories: Category[] }) {
           ),
       )}
 
+      <h2 className="text-2xl font-semibold">Planejamento financeiro</h2>
+      {/* TODO: Implement financial planning section */}
+
       <CategoryDialog />
 
+      {/* TODO: transformar em componente */}
       <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
         <DialogContent>
           <DialogHeader>

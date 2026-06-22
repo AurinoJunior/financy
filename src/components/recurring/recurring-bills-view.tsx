@@ -76,6 +76,14 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="items-center text-center p-4">
+            <CardTitle className="text-[32px] font-black text-primary">
+              {formatBRL(totals.total)}
+            </CardTitle>
+            <CardDescription>Total</CardDescription>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="items-center text-center p-4">
             <CardTitle className="text-[32px] font-black">{formatBRL(totals.essential)}</CardTitle>
             <CardDescription>Essenciais</CardDescription>
           </CardHeader>
@@ -86,14 +94,6 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
               {formatBRL(totals.nonEssential)}
             </CardTitle>
             <CardDescription>Não essenciais</CardDescription>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader className="items-center text-center p-4">
-            <CardTitle className="text-[32px] font-black text-primary">
-              {formatBRL(totals.total)}
-            </CardTitle>
-            <CardDescription>Total</CardDescription>
           </CardHeader>
         </Card>
       </div>
