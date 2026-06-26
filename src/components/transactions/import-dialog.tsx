@@ -136,27 +136,21 @@ export function ImportDialog() {
 
           <div className="grid gap-5">
             <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5">
-                <Label className="text-xs">Banco</Label>
-                <FilterSelect
-                  value={bank}
-                  onChange={setBank}
-                  options={[
-                    { value: "", label: "Selecione..." },
-                    ...BANKS.map((b) => ({ value: b.id, label: b.name })),
-                  ]}
-                  className="w-full"
-                />
-              </div>
-              <div className="grid gap-1.5">
-                <Label className="text-xs">Tipo de extrato</Label>
-                <FilterSelect
-                  value={accountType}
-                  onChange={(v) => setAccountType(v as AccountType | "")}
-                  options={[{ value: "", label: "Selecione..." }, ...ACCOUNT_TYPE_OPTIONS]}
-                  className="w-full"
-                />
-              </div>
+              <FilterSelect
+                value={bank}
+                onChange={setBank}
+                options={[
+                  { value: "", label: "Banco" },
+                  ...BANKS.map((b) => ({ value: b.id, label: b.name })),
+                ]}
+                className="w-full"
+              />
+              <FilterSelect
+                value={accountType}
+                onChange={(v) => setAccountType(v as AccountType | "")}
+                options={[{ value: "", label: "Tipo de extrato" }, ...ACCOUNT_TYPE_OPTIONS]}
+                className="w-full"
+              />
             </div>
 
             {headers.length === 0 ? (

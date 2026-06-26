@@ -9,11 +9,7 @@ export type Bank = {
 
 export const BANKS: Bank[] = [
   { id: "nubank", name: "Nubank", logo: "/banks/nubank.png", color: "#820AD1" },
-  { id: "itau", name: "Itaú", logo: "/banks/itau.svg", color: "#EC7000" },
-  { id: "bradesco", name: "Bradesco", logo: "/banks/bradesco.svg", color: "#CC092F" },
-  { id: "inter", name: "Inter", logo: "/banks/inter.svg", color: "#FF7A00" },
-  { id: "c6", name: "C6 Bank", logo: "/banks/c6.svg", color: "#212121" },
-  { id: "outro", name: "Outro", logo: "", color: "#64748b" },
+  // adicionar mais bancos aqui
 ]
 
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {

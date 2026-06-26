@@ -81,7 +81,7 @@ export function Topbar({ user }: { user: TopbarUser }) {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 bg-card">
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span className="font-medium text-foreground">{user.name ?? "Conta"}</span>
@@ -89,7 +89,7 @@ export function Topbar({ user }: { user: TopbarUser }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+            <DropdownMenuItem variant="destructive" onClick={handleSignOut} className="justify-center">
               <LogOutIcon />
               Sair
             </DropdownMenuItem>
