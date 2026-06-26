@@ -1,12 +1,44 @@
 "use server"
 
+import { createHash } from "node:crypto"
 import { and, eq, inArray, isNull } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { category, csvImport, transaction } from "@/db/schema"
 import { categorizeWithAI } from "@/lib/ai-categorize"
 import { getSession } from "@/lib/get-session"
-import { type ImportPayload, importPayloadSchema } from "@/lib/validations/transaction"
+import {
+  type ImportPayload,
+  importPayloadSchema,
+  type ParsedRow,
+} from "@/lib/validations/transaction"
+
+function computeContentHash(date: string, amount: number, description: string): string {
+  return createHash("sha256").update(`${date}|${amount}|${description}`).digest("hex")
+}
+
+export async function checkDuplicates(rows: ParsedRow[]): Promise<{ duplicateIndices: number[] }> {
+  const session = await getSession()
+  if (!session || rows.length === 0) return { duplicateIndices: [] }
+
+  const userId = session.user.id
+  const hashes = rows.map((r) => computeContentHash(r.date, r.amount, r.description))
+  const uniqueHashes = [...new Set(hashes)]
+
+  if (uniqueHashes.length === 0) return { duplicateIndices: [] }
+
+  const existing = await db
+    .select({ contentHash: transaction.contentHash })
+    .from(transaction)
+    .where(and(eq(transaction.userId, userId), inArray(transaction.contentHash, uniqueHashes)))
+
+  const existingSet = new Set(existing.map((e) => e.contentHash))
+  const duplicateIndices = hashes
+    .map((hash, i) => (existingSet.has(hash) ? i : -1))
+    .filter((i) => i !== -1)
+
+  return { duplicateIndices }
+}
 
 type ImportResult = { ok: true; count: number } | { ok: false; error: string }
 
@@ -36,6 +68,7 @@ export async function importTransactions(payload: ImportPayload): Promise<Import
         bank: bank ?? null,
         accountType: accountType ?? null,
         importId: imp.id,
+        contentHash: computeContentHash(r.date, r.amount, r.description),
       })),
     )
   })

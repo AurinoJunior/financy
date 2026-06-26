@@ -59,6 +59,7 @@ export const transaction = pgTable(
     type: text("type").notNull(), // 'income' | 'expense'
     bank: text("bank"), // e.g. 'nubank'
     accountType: text("account_type"), // 'credit' | 'debit'
+    contentHash: text("content_hash"), // SHA-256(date|amount|description) para dedup
     categoryId: text("category_id").references(() => category.id, { onDelete: "set null" }),
     importId: text("import_id").references(() => csvImport.id, { onDelete: "set null" }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -70,6 +71,7 @@ export const transaction = pgTable(
   (table) => [
     index("transaction_userId_idx").on(table.userId),
     index("transaction_date_idx").on(table.date),
+    index("transaction_userId_contentHash_idx").on(table.userId, table.contentHash),
   ],
 )
 

@@ -6,6 +6,50 @@ export type ColumnMapping = {
   amount: string
 }
 
+export type BankFormat = "nubank-debit" | "nubank-credit" | "generic"
+
+type BankParser = {
+  format: Exclude<BankFormat, "generic">
+  detect: (headers: string[]) => boolean
+  mapping: ColumnMapping
+  flipSign: boolean
+}
+
+const BANK_PARSERS: BankParser[] = [
+  {
+    format: "nubank-debit",
+    // Nubank débito tem coluna "Identificador" com UUID por linha
+    detect: (h) => h.some((x) => /^identificador$/i.test(x)),
+    mapping: { date: "Data", description: "Descrição", amount: "Valor" },
+    flipSign: false,
+  },
+  {
+    format: "nubank-credit",
+    // Nubank crédito tem colunas "date", "title", "amount" (em inglês)
+    detect: (h) => h.some((x) => /^title$/i.test(x)) && h.some((x) => /^amount$/i.test(x)),
+    mapping: { date: "date", description: "title", amount: "amount" },
+    // Crédito: positivo = gasto, negativo = pagamento/estorno (sinal inverso ao débito)
+    flipSign: true,
+  },
+]
+
+export function detectBankFormat(headers: string[]): BankFormat {
+  for (const parser of BANK_PARSERS) {
+    if (parser.detect(headers)) return parser.format
+  }
+  return "generic"
+}
+
+export function getAutoMapping(bankFormat: BankFormat, headers: string[]): Partial<ColumnMapping> {
+  const parser = BANK_PARSERS.find((p) => p.format === bankFormat)
+  if (parser) return parser.mapping
+  return detectColumns(headers)
+}
+
+export function isFlipSign(bankFormat: BankFormat): boolean {
+  return BANK_PARSERS.find((p) => p.format === bankFormat)?.flipSign ?? false
+}
+
 /** Converte "R$ 1.234,56", "-1.234,56", "(1.234,56)" → centavos com sinal. */
 export function parseBrAmount(raw: string): number | null {
   if (!raw) return null
@@ -68,12 +112,15 @@ export function detectColumns(headers: string[]): Partial<ColumnMapping> {
 export function normalizeRow(
   row: Record<string, string>,
   mapping: ColumnMapping,
+  flipSign = false,
 ): ParsedRow | null {
-  const signed = parseBrAmount(row[mapping.amount] ?? "")
+  let signed = parseBrAmount(row[mapping.amount] ?? "")
   const date = parseBrDate(row[mapping.date] ?? "")
   const description = (row[mapping.description] ?? "").trim()
 
   if (signed === null || signed === 0 || date === null || !description) return null
+
+  if (flipSign) signed = -signed
 
   return {
     date,

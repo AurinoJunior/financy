@@ -2,9 +2,9 @@
 
 import { UploadIcon } from "lucide-react"
 import Papa from "papaparse"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
-import { importTransactions } from "@/app/(app)/transacoes/actions"
+import { checkDuplicates, importTransactions } from "@/app/(app)/transacoes/actions"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,19 +15,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FilterSelect } from "@/components/ui/filter-select"
-import { Label } from "@/components/ui/label"
 import { type AccountType, BANKS } from "@/lib/banks"
-import { type ColumnMapping, detectColumns, normalizeRow } from "@/lib/csv"
+import {
+  type BankFormat,
+  type ColumnMapping,
+  detectBankFormat,
+  getAutoMapping,
+  isFlipSign,
+  normalizeRow,
+} from "@/lib/csv"
 import { formatBRL, formatDateBr } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 type RawRow = Record<string, string>
-
-const fieldLabels: Record<keyof ColumnMapping, string> = {
-  date: "Data",
-  description: "Descrição",
-  amount: "Valor",
-}
 
 const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string }[] = [
   { value: "debit", label: "Débito" },
@@ -41,7 +41,10 @@ export function ImportDialog() {
   const [filename, setFilename] = useState("")
   const [headers, setHeaders] = useState<string[]>([])
   const [rows, setRows] = useState<RawRow[]>([])
+  const [bankFormat, setBankFormat] = useState<BankFormat>("generic")
   const [mapping, setMapping] = useState<Partial<ColumnMapping>>({})
+  const [duplicateIndices, setDuplicateIndices] = useState<number[] | null>(null)
+  const [checking, setChecking] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   function reset() {
@@ -50,7 +53,10 @@ export function ImportDialog() {
     setFilename("")
     setHeaders([])
     setRows([])
+    setBankFormat("generic")
     setMapping({})
+    setDuplicateIndices(null)
+    setChecking(false)
     setSubmitting(false)
   }
 
@@ -72,10 +78,13 @@ export function ImportDialog() {
           toast.error("Não foi possível ler as colunas do CSV")
           return
         }
+        const fmt = detectBankFormat(fields)
         setFilename(file.name)
         setHeaders(fields)
         setRows(result.data)
-        setMapping(detectColumns(fields))
+        setBankFormat(fmt)
+        setMapping(getAutoMapping(fmt, fields))
+        setDuplicateIndices(null)
       },
       error: () => toast.error("Falha ao ler o arquivo"),
     })
@@ -84,28 +93,50 @@ export function ImportDialog() {
   const validRows = useMemo(() => {
     if (!mapping.date || !mapping.description || !mapping.amount) return []
     const full = mapping as ColumnMapping
+    const flip = isFlipSign(bankFormat)
     return rows
-      .map((row) => normalizeRow(row, full))
+      .map((row) => normalizeRow(row, full, flip))
       .filter((r): r is NonNullable<typeof r> => r !== null)
-  }, [rows, mapping])
+  }, [rows, mapping, bankFormat])
+
+  useEffect(() => {
+    if (validRows.length === 0) {
+      setDuplicateIndices(null)
+      return
+    }
+    setChecking(true)
+    setDuplicateIndices(null)
+    checkDuplicates(validRows).then((result) => {
+      setDuplicateIndices(result.duplicateIndices)
+      setChecking(false)
+    })
+  }, [validRows])
 
   const ignored = rows.length - validRows.length
   const bankAccountReady = Boolean(bank && accountType)
-  const ready = Boolean(
-    bankAccountReady &&
-      mapping.date &&
-      mapping.description &&
-      mapping.amount &&
-      validRows.length > 0,
-  )
+  const ready = Boolean(bankAccountReady && validRows.length > 0)
 
-  async function handleImport() {
+  const duplicateSet = useMemo(() => new Set(duplicateIndices ?? []), [duplicateIndices])
+  const newCount =
+    duplicateIndices !== null ? validRows.length - duplicateIndices.length : validRows.length
+
+  async function handleImport(skipDuplicates: boolean) {
+    const rowsToImport =
+      skipDuplicates && duplicateIndices !== null
+        ? validRows.filter((_, i) => !duplicateSet.has(i))
+        : validRows
+
+    if (rowsToImport.length === 0) {
+      toast.info("Nenhuma transação nova para importar")
+      return
+    }
+
     setSubmitting(true)
     const result = await importTransactions({
       filename,
       bank: bank || undefined,
       accountType: (accountType as AccountType) || undefined,
-      rows: validRows,
+      rows: rowsToImport,
     })
     setSubmitting(false)
 
@@ -117,6 +148,8 @@ export function ImportDialog() {
     toast.success(`${result.count} transações importadas`)
     handleOpenChange(false)
   }
+
+  const hasDuplicates = duplicateIndices !== null && duplicateIndices.length > 0
 
   return (
     <>
@@ -176,33 +209,19 @@ export function ImportDialog() {
               </label>
             ) : (
               <div className="grid gap-4">
-                <div className="grid grid-cols-3 gap-2">
-                  {(Object.keys(fieldLabels) as Array<keyof ColumnMapping>).map((field) => (
-                    <div key={field} className="grid gap-1.5">
-                      <Label className="text-xs">{fieldLabels[field]}</Label>
-                      <FilterSelect
-                        value={mapping[field] ?? ""}
-                        onChange={(v) => setMapping((m) => ({ ...m, [field]: v }))}
-                        options={[
-                          { value: "", label: "—" },
-                          ...headers.map((h) => ({ value: h, label: h })),
-                        ]}
-                        className="w-full"
-                      />
-                    </div>
-                  ))}
-                </div>
-
                 <div className="rounded-lg border border-border">
                   <div className="border-b border-border px-3 py-2 text-xs text-muted-foreground">
                     {validRows.length} válidas
                     {ignored > 0 && ` · ${ignored} ignoradas`}
                   </div>
                   <div className="max-h-48 overflow-y-auto">
-                    {validRows.slice(0, 6).map((r) => (
+                    {validRows.slice(0, 6).map((r, i) => (
                       <div
                         key={`${r.date}-${r.amount}-${r.description}`}
-                        className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
+                        className={cn(
+                          "flex items-center justify-between gap-3 px-3 py-2 text-sm",
+                          duplicateSet.has(i) && "opacity-40",
+                        )}
                       >
                         <span className="w-20 shrink-0 text-muted-foreground">
                           {formatDateBr(r.date)}
@@ -226,6 +245,20 @@ export function ImportDialog() {
                     )}
                   </div>
                 </div>
+
+                {checking && (
+                  <p className="text-xs text-muted-foreground">Verificando duplicatas...</p>
+                )}
+
+                {hasDuplicates && (
+                  <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5 text-sm">
+                    <span className="font-medium text-amber-400">
+                      {duplicateIndices.length}{" "}
+                      {duplicateIndices.length === 1 ? "Inconsistência" : "Inconsistências"}
+                    </span>
+                    <span className="text-muted-foreground"> · {newCount} novas</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -234,9 +267,38 @@ export function ImportDialog() {
             <Button variant="outline" type="button" onClick={() => handleOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="button" onClick={handleImport} disabled={!ready || submitting}>
-              {submitting ? "Importando..." : `Importar ${validRows.length || ""}`.trim()}
-            </Button>
+
+            {hasDuplicates ? (
+              <>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => handleImport(false)}
+                  disabled={!ready || submitting}
+                >
+                  {submitting ? "Importando..." : "Importar tudo"}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleImport(true)}
+                  disabled={!ready || submitting || checking || newCount === 0}
+                >
+                  {submitting ? "Importando..." : `Importar ${newCount} novas`}
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => handleImport(false)}
+                disabled={!ready || submitting || checking}
+              >
+                {checking
+                  ? "Verificando..."
+                  : submitting
+                    ? "Importando..."
+                    : `Importar ${validRows.length || ""}`.trim()}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
