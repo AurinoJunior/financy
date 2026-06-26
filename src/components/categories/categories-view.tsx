@@ -4,6 +4,7 @@ import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { deleteCategory } from "@/app/(app)/configuracoes/actions"
+import { FinancialPlanningView } from "@/components/financial-plan/financial-planning-view"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import {
@@ -15,12 +16,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { Category } from "@/db/app-schema"
+import type { Category, FinancialPlan } from "@/db/app-schema"
 import { CATEGORY_TYPE_LABELS, getCategoryIcon } from "@/lib/categories"
 import { useCategoryDialog } from "@/stores/category-dialog"
 import { CategoryDialog } from "./category-dialog"
 
-export function CategoriesView({ categories }: { categories: Category[] }) {
+export function CategoriesView({
+  categories,
+  plan,
+}: {
+  categories: Category[]
+  plan: FinancialPlan | null
+}) {
   const openCreate = useCategoryDialog((s) => s.openCreate)
   const openEdit = useCategoryDialog((s) => s.openEdit)
   const [deleting, setDeleting] = useState<Category | null>(null)
@@ -115,7 +122,7 @@ export function CategoriesView({ categories }: { categories: Category[] }) {
       )}
 
       <h2 className="text-2xl font-semibold">Planejamento financeiro</h2>
-      {/* TODO: Implement financial planning section */}
+      <FinancialPlanningView plan={plan} />
 
       <CategoryDialog />
 

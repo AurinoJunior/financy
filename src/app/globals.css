@@ -163,4 +163,33 @@
     z-index: -1;
     pointer-events: none;
   }
+
+  /* Financial planning slider */
+  .financial-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    border-radius: 9999px;
+    outline: none;
+    cursor: pointer;
+  }
+  .financial-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: oklch(0.97 0 0);
+    cursor: pointer;
+    border: 2px solid oklch(1 0 0 / 0.15);
+    box-shadow: 0 2px 8px oklch(0 0 0 / 0.5);
+  }
+  .financial-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: oklch(0.97 0 0);
+    cursor: pointer;
+    border: 2px solid oklch(1 0 0 / 0.15);
+    box-shadow: 0 2px 8px oklch(0 0 0 / 0.5);
+  }
 }

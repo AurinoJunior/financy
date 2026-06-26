@@ -43,6 +43,13 @@
       "when": 1782086074939,
       "tag": "0005_sturdy_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782431514598,
+      "tag": "0006_dark_calypso",
+      "breakpoints": true
     }
   ]
 }
