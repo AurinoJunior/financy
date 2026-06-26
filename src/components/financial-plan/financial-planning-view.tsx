@@ -78,6 +78,24 @@ export function FinancialPlanningView({ plan }: Props) {
       {/* Sliders — 60% */}
       <Card className="flex-3">
         <CardContent className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="simulation-income" className="text-sm font-medium text-white">
+              Renda mensal
+            </label>
+            <div className="glass-blur flex h-10 items-center gap-2 rounded-xl border border-white/8 bg-white/5 px-3 shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)]">
+              <span className="shrink-0 text-sm text-muted-foreground">R$</span>
+              <input
+                id="simulation-income"
+                type="text"
+                inputMode="numeric"
+                placeholder="0,00"
+                value={income}
+                onChange={(e) => setIncome(maskCurrencyInput(e.target.value))}
+                className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+          </div>
+
           <div className="space-y-5">
             {GROUPS.map(({ key, label, color }) => (
               <div key={key} className="space-y-2">
@@ -105,21 +123,7 @@ export function FinancialPlanningView({ plan }: Props) {
             ))}
           </div>
 
-          <div
-            className={cn(
-              "flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-colors",
-              isValid
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/30 bg-red-500/10 text-red-400",
-            )}
-          >
-            <span>Total alocado</span>
-            <span>
-              {total}% {isValid ? "✓" : diff > 0 ? `(faltam ${diff}%)` : `(excesso de ${-diff}%)`}
-            </span>
-          </div>
-
-          <div className="flex gap-2">
+          <div className="mt-16 flex items-center justify-center gap-2">
             <Button
               variant="outline"
               size="icon"
@@ -129,7 +133,7 @@ export function FinancialPlanningView({ plan }: Props) {
             >
               <RotateCcwIcon />
             </Button>
-            <Button onClick={handleSave} disabled={!isValid || saving} className="flex-1">
+            <Button onClick={handleSave} disabled={!isValid || saving}>
               {saving ? "Salvando..." : "Salvar planejamento"}
             </Button>
           </div>
@@ -138,24 +142,6 @@ export function FinancialPlanningView({ plan }: Props) {
 
       {/* Simulação — 40% */}
       <div className="flex flex-2 flex-col space-y-5">
-        <div className="flex flex-col gap-2">
-          <label htmlFor="simulation-income" className="text-sm font-medium text-white">
-            Renda mensal
-          </label>
-          <div className="glass-blur flex h-10 items-center gap-2 rounded-xl border border-white/8 bg-white/5 px-3 shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)]">
-            <span className="shrink-0 text-sm text-muted-foreground">R$</span>
-            <input
-              id="simulation-income"
-              type="text"
-              inputMode="numeric"
-              placeholder="0,00"
-              value={income}
-              onChange={(e) => setIncome(maskCurrencyInput(e.target.value))}
-              className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-muted-foreground"
-            />
-          </div>
-        </div>
-
         {incomeCents !== null && incomeCents > 0 ? (
           <div className="overflow-hidden rounded-xl border border-border">
             <div className="grid grid-cols-3 border-b border-border bg-white/5 px-3 py-2.5">
@@ -183,6 +169,20 @@ export function FinancialPlanningView({ plan }: Props) {
             Informe sua renda para ver a simulação.
           </p>
         )}
+
+        <div
+          className={cn(
+            "flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-colors",
+            isValid
+              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+              : "border-red-500/30 bg-red-500/10 text-red-400",
+          )}
+        >
+          <span>Total alocado</span>
+          <span>
+            {total}% {isValid ? "✓" : diff > 0 ? `(faltam ${diff}%)` : `(excesso de ${-diff}%)`}
+          </span>
+        </div>
       </div>
     </div>
   )
