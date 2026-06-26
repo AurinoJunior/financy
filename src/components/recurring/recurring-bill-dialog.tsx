@@ -167,6 +167,7 @@ export function RecurringBillDialog() {
                 onChange={(v) => setValue("dueDay", Number(v), { shouldValidate: true })}
                 options={DUE_DAY_OPTIONS}
                 triggerLabel={`Dia ${dueDay}`}
+                contentClassName="max-h-[420px]"
               />
             </div>
           </div>

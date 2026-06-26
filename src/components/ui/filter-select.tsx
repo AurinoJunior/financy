@@ -17,22 +17,31 @@ export function FilterSelect({
   options,
   triggerLabel,
   align = "start",
+  contentClassName,
+  className,
 }: {
   value: string
   onChange: (value: string) => void
   options: FilterOption[]
   triggerLabel?: string
   align?: "start" | "end"
+  contentClassName?: string
+  className?: string
 }) {
   const selected = options.find((o) => o.value === value)
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="glass-blur flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm text-white shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)] outline-none">
+      <DropdownMenuTrigger
+        className={cn(
+          "glass-blur flex cursor-pointer items-center justify-between gap-1.5 rounded-xl border border-white/8 bg-white/5 px-3 py-2 text-sm text-white shadow-[0_4px_16px_oklch(0_0_0/0.3),inset_0_1px_0_oklch(1_0_0/0.07)] outline-none",
+          className,
+        )}
+      >
         {triggerLabel ?? selected?.label ?? value}
         <ChevronDownIcon className="size-3.5" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="min-w-44">
+      <DropdownMenuContent align={align} className={cn("min-w-44", contentClassName)}>
         {options.map((o) => (
           <DropdownMenuItem
             key={o.value}

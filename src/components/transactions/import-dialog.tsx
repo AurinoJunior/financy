@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { FilterSelect } from "@/components/ui/filter-select"
 import { Label } from "@/components/ui/label"
 import { type AccountType, BANKS } from "@/lib/banks"
 import { type ColumnMapping, detectColumns, normalizeRow } from "@/lib/csv"
@@ -137,33 +138,24 @@ export function ImportDialog() {
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5">
                 <Label className="text-xs">Banco</Label>
-                <select
+                <FilterSelect
                   value={bank}
-                  onChange={(e) => setBank(e.target.value)}
-                  className="h-9 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
-                >
-                  <option value="">Selecione...</option>
-                  {BANKS.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setBank}
+                  options={[
+                    { value: "", label: "Selecione..." },
+                    ...BANKS.map((b) => ({ value: b.id, label: b.name })),
+                  ]}
+                  className="w-full"
+                />
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-xs">Tipo de extrato</Label>
-                <select
+                <FilterSelect
                   value={accountType}
-                  onChange={(e) => setAccountType(e.target.value as AccountType)}
-                  className="h-9 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
-                >
-                  <option value="">Selecione...</option>
-                  {ACCOUNT_TYPE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(v) => setAccountType(v as AccountType | "")}
+                  options={[{ value: "", label: "Selecione..." }, ...ACCOUNT_TYPE_OPTIONS]}
+                  className="w-full"
+                />
               </div>
             </div>
 
@@ -194,18 +186,15 @@ export function ImportDialog() {
                   {(Object.keys(fieldLabels) as Array<keyof ColumnMapping>).map((field) => (
                     <div key={field} className="grid gap-1.5">
                       <Label className="text-xs">{fieldLabels[field]}</Label>
-                      <select
+                      <FilterSelect
                         value={mapping[field] ?? ""}
-                        onChange={(e) => setMapping((m) => ({ ...m, [field]: e.target.value }))}
-                        className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm outline-none focus-visible:border-ring dark:bg-input/30"
-                      >
-                        <option value="">—</option>
-                        {headers.map((h) => (
-                          <option key={h} value={h}>
-                            {h}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(v) => setMapping((m) => ({ ...m, [field]: v }))}
+                        options={[
+                          { value: "", label: "—" },
+                          ...headers.map((h) => ({ value: h, label: h })),
+                        ]}
+                        className="w-full"
+                      />
                     </div>
                   ))}
                 </div>
