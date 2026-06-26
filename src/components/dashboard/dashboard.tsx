@@ -2,7 +2,7 @@
 
 import { ArrowDownLeftIcon, ArrowUpRightIcon, Settings2Icon, WalletIcon } from "lucide-react"
 import Link from "next/link"
-import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, Cell, LabelList, Line, LineChart, XAxis, YAxis } from "recharts"
 import { MonthSelector } from "@/components/dashboard/month-selector"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -26,8 +26,6 @@ export function Dashboard({ data }: { data: DashboardData }) {
       </Card>
     )
   }
-
-  const maxMonth = Math.max(...data.byMonth.map((m) => m.total), 1)
 
   return (
     <div className="space-y-6">
@@ -85,31 +83,46 @@ export function Dashboard({ data }: { data: DashboardData }) {
               <CardDescription>Últimos 8 meses</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex h-44 gap-2">
-                {data.byMonth.map((m, i) => {
-                  const isCurrent = i === data.byMonth.length - 1
-                  const heightPct = (m.total / maxMonth) * 100
-                  return (
-                    <div key={m.key} className="flex flex-1 flex-col items-center gap-2">
-                      <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                        {m.total > 0 ? formatBRL(m.total).replace("R$", "").trim() : ""}
-                      </span>
-                      <div className="relative w-full flex-1">
-                        <div
-                          className={cn(
-                            "absolute bottom-0 w-full rounded-md transition-all",
-                            isCurrent ? "bg-primary" : "bg-primary/20",
-                          )}
-                          style={{ height: `${Math.max(heightPct, 2)}%` }}
-                        />
-                      </div>
-                      <span className="shrink-0 text-sm capitalize text-muted-foreground">
-                        {m.label}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
+              <ChartContainer
+                config={{ total: { label: "Gastos", color: "var(--color-primary)" } }}
+                className="h-44 w-full"
+              >
+                <LineChart data={data.byMonth} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 12, fill: "var(--color-muted-foreground)" }}
+                    className="capitalize"
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+                    tickFormatter={(v) => {
+                      const r = v / 100
+                      return r >= 1000
+                        ? `${(r / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}k`
+                        : r.toLocaleString("pt-BR", { maximumFractionDigits: 0 })
+                    }}
+                    width={42}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent formatter={(value) => formatBRL(value as number)} />
+                    }
+                  />
+                  <Line
+                    dataKey="total"
+                    type="monotone"
+                    stroke="var(--color-primary)"
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: "var(--color-primary)", strokeWidth: 0 }}
+                    activeDot={{ r: 5, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </div>
