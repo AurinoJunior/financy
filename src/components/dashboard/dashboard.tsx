@@ -1,9 +1,12 @@
-import { ArrowDownLeftIcon, ArrowUpRightIcon, RepeatIcon, WalletIcon } from "lucide-react"
+"use client"
+
+import { ArrowDownLeftIcon, ArrowUpRightIcon, Settings2Icon, WalletIcon } from "lucide-react"
 import Link from "next/link"
+import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts"
 import { MonthSelector } from "@/components/dashboard/month-selector"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getCategoryIcon } from "@/lib/categories"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import type { DashboardData } from "@/lib/dashboard"
 import { formatBRL, formatDateBr } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -32,18 +35,19 @@ export function Dashboard({ data }: { data: DashboardData }) {
         <MonthSelector availableMonths={data.availableMonths} currentMonth={data.currentMonth} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Topo: resumo financeiro */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <SummaryCard
-          label="Gasto no mês"
-          value={formatBRL(data.expenses)}
-          icon={<ArrowUpRightIcon className="size-4" />}
-          tone="default"
-        />
-        <SummaryCard
-          label="Entradas no mês"
+          label="Entradas"
           value={formatBRL(data.income)}
           icon={<ArrowDownLeftIcon className="size-4" />}
           tone="primary"
+        />
+        <SummaryCard
+          label="Saídas"
+          value={formatBRL(data.expenses)}
+          icon={<ArrowUpRightIcon className="size-4" />}
+          tone="default"
         />
         <SummaryCard
           label="Saldo"
@@ -51,19 +55,16 @@ export function Dashboard({ data }: { data: DashboardData }) {
           icon={<WalletIcon className="size-4" />}
           tone={data.balance < 0 ? "negative" : "default"}
         />
-        <SummaryCard
-          label="Recorrentes / mês"
-          value={formatBRL(data.recurringTotal)}
-          icon={<RepeatIcon className="size-4" />}
-          tone="default"
-        />
       </div>
 
+      {/* Bento principal: 3 colunas */}
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Coluna esquerda 2/3 */}
         <div className="space-y-6 lg:col-span-2">
+          {/* Gastos por categoria */}
           <Card>
             <CardHeader>
-              <CardTitle>Para onde vai meu dinheiro</CardTitle>
+              <CardTitle className="text-xl">Para onde vai meu dinheiro</CardTitle>
               <CardDescription>Gastos do mês por categoria</CardDescription>
             </CardHeader>
             <CardContent>
@@ -72,64 +73,39 @@ export function Dashboard({ data }: { data: DashboardData }) {
                   Nenhum gasto neste mês.
                 </p>
               ) : (
-                <div className="space-y-4">
-                  {data.byCategory.map((slice) => {
-                    const Icon = getCategoryIcon(slice.icon)
-                    return (
-                      <div key={slice.id} className="space-y-1.5">
-                        <div className="flex items-center justify-between gap-2 text-sm">
-                          <span className="flex items-center gap-2">
-                            <span
-                              className="flex size-5 items-center justify-center rounded-md text-white"
-                              style={{ backgroundColor: slice.color }}
-                            >
-                              <Icon className="size-3" />
-                            </span>
-                            {slice.name}
-                          </span>
-                          <span className="tabular-nums text-muted-foreground">
-                            {formatBRL(slice.total)} · {slice.pct.toFixed(0)}%
-                          </span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full"
-                            style={{ width: `${slice.pct}%`, backgroundColor: slice.color }}
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                <CategoryBarChart data={data} />
               )}
             </CardContent>
           </Card>
 
+          {/* Gastos por mês */}
           <Card>
             <CardHeader>
-              <CardTitle>Gastos por mês</CardTitle>
-              <CardDescription>Últimos 6 meses</CardDescription>
+              <CardTitle className="text-xl">Gastos por mês</CardTitle>
+              <CardDescription>Últimos 8 meses</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex h-44 items-end justify-between gap-2">
+              <div className="flex h-44 gap-2">
                 {data.byMonth.map((m, i) => {
                   const isCurrent = i === data.byMonth.length - 1
                   const heightPct = (m.total / maxMonth) * 100
                   return (
                     <div key={m.key} className="flex flex-1 flex-col items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground tabular-nums">
+                      <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
                         {m.total > 0 ? formatBRL(m.total).replace("R$", "").trim() : ""}
                       </span>
-                      <div className="flex h-full w-full items-end">
+                      <div className="relative w-full flex-1">
                         <div
                           className={cn(
-                            "w-full rounded-md transition-all",
+                            "absolute bottom-0 w-full rounded-md transition-all",
                             isCurrent ? "bg-primary" : "bg-primary/20",
                           )}
                           style={{ height: `${Math.max(heightPct, 2)}%` }}
                         />
                       </div>
-                      <span className="text-xs capitalize text-muted-foreground">{m.label}</span>
+                      <span className="shrink-0 text-sm capitalize text-muted-foreground">
+                        {m.label}
+                      </span>
                     </div>
                   )
                 })}
@@ -138,48 +114,179 @@ export function Dashboard({ data }: { data: DashboardData }) {
           </Card>
         </div>
 
+        {/* Coluna direita 1/3 */}
         <div className="space-y-6">
+          {/* Planejado vs Real */}
           <Card>
             <CardHeader>
-              <CardTitle>Recorrentes</CardTitle>
-              <CardDescription>Compromissos fixos do mês</CardDescription>
+              <CardTitle className="text-xl">Planejado vs Real</CardTitle>
+              <CardDescription>
+                {data.planVsReal
+                  ? `Base: ${formatBRL(data.planVsReal.monthlyIncome)}/mês`
+                  : "Configure sua renda para ativar"}
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Row label="Essenciais" value={formatBRL(data.recurringEssential)} />
-              <Row label="Não essenciais" value={formatBRL(data.recurringNonEssential)} />
-              <div className="border-t border-border pt-3">
-                <Row label="Total" value={formatBRL(data.recurringTotal)} strong />
-              </div>
+            <CardContent>
+              {!data.planVsReal ? (
+                <div className="flex flex-col items-start gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Defina sua renda mensal no planejamento financeiro para comparar o planejado com
+                    o real.
+                  </p>
+                  <Button variant="outline" size="sm" render={<Link href="/configuracoes" />}>
+                    <Settings2Icon className="size-3.5" />
+                    Configurar
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-5">
+                  <PlanGroup
+                    label="Essencial"
+                    planned={data.planVsReal.essential.planned}
+                    real={data.planVsReal.essential.real}
+                    color="oklch(0.87 0.21 128)"
+                  />
+                  <PlanGroup
+                    label="Não essencial"
+                    planned={data.planVsReal.nonEssential.planned}
+                    real={data.planVsReal.nonEssential.real}
+                    color="oklch(0.75 0.18 60)"
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
+          {/* Top 7 mais caros no crédito */}
           <Card>
             <CardHeader>
-              <CardTitle>Transações recentes</CardTitle>
+              <CardTitle className="text-xl mb-4">Maiores gastos no crédito</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {data.recent.map((t) => (
-                <div key={t.id} className="flex items-center justify-between gap-2 text-sm">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{t.description}</p>
-                    <p className="text-xs text-muted-foreground">{formatDateBr(t.date)}</p>
-                  </div>
-                  <span
-                    className={cn(
-                      "shrink-0 font-semibold tabular-nums",
-                      t.type === "income" && "text-primary",
-                    )}
-                  >
-                    {t.type === "expense" ? "-" : "+"}
-                    {formatBRL(t.amount)}
-                  </span>
+            <CardContent>
+              {data.topExpenses.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  Nenhum gasto no crédito neste mês.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {data.topExpenses.map((t, i) => (
+                    <div key={t.id} className="flex items-start gap-3">
+                      <span className="w-6 shrink-0 text-center text-xl font-medium text-muted-foreground">
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{t.description}</p>
+                        <p className="text-xs text-muted-foreground">{formatDateBr(t.date)}</p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold tabular-nums text-red-400">
+                        {formatBRL(t.amount)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+  )
+}
+
+function PlanGroup({
+  label,
+  planned,
+  real,
+  color,
+}: {
+  label: string
+  planned: number
+  real: number
+  color: string
+}) {
+  const pct = planned > 0 ? Math.min((real / planned) * 100, 100) : 0
+  const over = real > planned
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2 text-sm">
+        <span>{label}</span>
+        <span className={cn("tabular-nums", over ? "text-destructive" : "text-muted-foreground")}>
+          {formatBRL(real)}
+          <span className="text-muted-foreground"> / {formatBRL(planned)}</span>
+        </span>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
+        <div
+          className={cn("h-full rounded-full transition-all", over && "bg-destructive")}
+          style={{
+            width: `${pct}%`,
+            backgroundColor: over ? undefined : color,
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function CategoryBarChart({ data }: { data: DashboardData }) {
+  const chartData = data.byCategory.slice(0, 10).map((s) => ({
+    name: s.name,
+    total: s.total,
+    color: s.color,
+    pct: s.pct,
+  }))
+
+  const chartConfig = Object.fromEntries(
+    chartData.map((s) => [s.name, { label: s.name, color: s.color }]),
+  )
+
+  return (
+    <ChartContainer
+      config={chartConfig}
+      className="w-full"
+      style={{ height: chartData.length * 52 + 8 }}
+    >
+      <BarChart
+        data={chartData}
+        layout="vertical"
+        margin={{ left: 6, right: 72, top: 0, bottom: 0 }}
+      >
+        <YAxis
+          dataKey="name"
+          type="category"
+          tickLine={false}
+          axisLine={false}
+          width={126}
+          tick={{ fontSize: 14, fill: "white" }}
+        />
+        <XAxis type="number" hide />
+        <ChartTooltip
+          cursor={{ fill: "oklch(1 0 0 / 0.05)", radius: 4 }}
+          content={
+            <ChartTooltipContent
+              // biome-ignore lint/suspicious/noExplicitAny: recharts item payload is untyped
+              formatter={(value, _name, item: any) => {
+                const pct = item?.payload?.pct
+                return `${formatBRL(value as number)}${data.planVsReal && pct != null ? ` · ${pct.toFixed(0)}%` : ""}`
+              }}
+            />
+          }
+        />
+        <Bar dataKey="total" radius={4} barSize={40}>
+          <LabelList
+            dataKey="total"
+            position="right"
+            // biome-ignore lint/suspicious/noExplicitAny: recharts label value is untyped
+            formatter={(value: any) => formatBRL(Number(value)).replace("R$ ", "").trim()}
+            style={{ fill: "white", fontSize: 12 }}
+          />
+          {chartData.map((entry) => (
+            <Cell key={entry.name} fill={entry.color} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   )
 }
 
@@ -215,16 +322,5 @@ function SummaryCard({
         </CardTitle>
       </CardHeader>
     </Card>
-  )
-}
-
-function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
-  return (
-    <div className="flex items-center justify-between text-sm">
-      <span className={cn("text-muted-foreground", strong && "font-medium text-foreground")}>
-        {label}
-      </span>
-      <span className={cn("tabular-nums", strong ? "font-semibold" : "font-medium")}>{value}</span>
-    </div>
   )
 }

@@ -1,4 +1,4 @@
-import type { Category, RecurringBill, Transaction } from "@/db/app-schema"
+import type { Category, FinancialPlan, Transaction } from "@/db/app-schema"
 
 export type CategorySlice = {
   id: string
@@ -11,6 +11,15 @@ export type CategorySlice = {
 
 export type MonthBar = { key: string; label: string; total: number }
 
+export type PlanGroup = { planned: number; real: number }
+
+export type PlanVsReal = {
+  monthlyIncome: number
+  essential: PlanGroup
+  nonEssential: PlanGroup
+  patrimonyPlanned: number
+}
+
 export type DashboardData = {
   currentMonth: string
   monthLabel: string
@@ -18,12 +27,10 @@ export type DashboardData = {
   expenses: number
   income: number
   balance: number
-  recurringEssential: number
-  recurringNonEssential: number
-  recurringTotal: number
   byCategory: CategorySlice[]
   byMonth: MonthBar[]
-  recent: Transaction[]
+  topExpenses: Transaction[]
+  planVsReal: PlanVsReal | null
   hasData: boolean
 }
 
@@ -39,9 +46,9 @@ function monthKey(date: Date): string {
 
 export function computeDashboard(
   transactions: Transaction[],
-  bills: RecurringBill[],
   categories: Category[],
   selectedMonth?: string,
+  plan?: FinancialPlan | null,
 ): DashboardData {
   const now = new Date()
   const defaultKey = monthKey(now)
@@ -64,7 +71,10 @@ export function computeDashboard(
 
   let expenses = 0
   let income = 0
+  let essentialReal = 0
+  let nonEssentialReal = 0
   const buckets = new Map<string, number>()
+
   for (const t of monthTx) {
     if (t.type === "income") {
       income += t.amount
@@ -73,8 +83,15 @@ export function computeDashboard(
     expenses += t.amount
     const key = t.categoryId ?? "none"
     buckets.set(key, (buckets.get(key) ?? 0) + t.amount)
+
+    if (t.categoryId) {
+      const cat = categoryById.get(t.categoryId)
+      if (cat?.type === "essential") essentialReal += t.amount
+      else if (cat?.type === "non_essential") nonEssentialReal += t.amount
+    }
   }
 
+  const pctBase = plan?.simulationIncome ?? (expenses > 0 ? expenses : null)
   const byCategory: CategorySlice[] = [...buckets.entries()]
     .map(([key, total]) => {
       const cat = key === "none" ? null : categoryById.get(key)
@@ -84,14 +101,13 @@ export function computeDashboard(
         color: cat?.color ?? UNCATEGORIZED.color,
         icon: cat?.icon ?? UNCATEGORIZED.icon,
         total,
-        pct: expenses > 0 ? (total / expenses) * 100 : 0,
+        pct: pctBase ? (total / pctBase) * 100 : 0,
       }
     })
     .sort((a, b) => b.total - a.total)
 
-  // Últimos 6 meses a partir do mês selecionado (do mais antigo ao atual).
   const byMonth: MonthBar[] = []
-  for (let i = 5; i >= 0; i--) {
+  for (let i = 7; i >= 0; i--) {
     const d = new Date(year, month - 1 - i, 1)
     const key = monthKey(d)
     const total = transactions
@@ -100,15 +116,25 @@ export function computeDashboard(
     byMonth.push({ key, label: d.toLocaleDateString("pt-BR", { month: "short" }), total })
   }
 
-  let recurringEssential = 0
-  let recurringNonEssential = 0
-  for (const b of bills) {
-    if (!b.active) continue
-    if (b.essential) recurringEssential += b.amount
-    else recurringNonEssential += b.amount
-  }
+  const topExpenses = [...monthTx]
+    .filter((t) => t.type === "expense" && t.accountType === "credit")
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 7)
 
-  const recentInMonth = [...monthTx].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6)
+  const planVsReal: PlanVsReal | null = plan?.simulationIncome
+    ? {
+        monthlyIncome: plan.simulationIncome,
+        essential: {
+          planned: Math.round((plan.essentialPct / 100) * plan.simulationIncome),
+          real: essentialReal,
+        },
+        nonEssential: {
+          planned: Math.round((plan.nonEssentialPct / 100) * plan.simulationIncome),
+          real: nonEssentialReal,
+        },
+        patrimonyPlanned: Math.round((plan.patrimonyPct / 100) * plan.simulationIncome),
+      }
+    : null
 
   return {
     currentMonth,
@@ -117,12 +143,10 @@ export function computeDashboard(
     expenses,
     income,
     balance: income - expenses,
-    recurringEssential,
-    recurringNonEssential,
-    recurringTotal: recurringEssential + recurringNonEssential,
     byCategory,
     byMonth,
-    recent: recentInMonth,
+    topExpenses,
+    planVsReal,
     hasData: transactions.length > 0,
   }
 }
