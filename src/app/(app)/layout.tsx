@@ -1,9 +1,12 @@
+import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Topbar } from "@/components/topbar"
 import { getSession } from "@/lib/get-session"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
+
+  if (!session) redirect("/api/auth/clear-session")
 
   return (
     <div className="flex flex-1">

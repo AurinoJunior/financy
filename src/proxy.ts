@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 const authRoutes = ["/login", "/register"]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request)
   const { pathname } = request.nextUrl
   const isAuthRoute = authRoutes.includes(pathname)
