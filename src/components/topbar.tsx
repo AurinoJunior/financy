@@ -89,6 +89,10 @@ export function Topbar({ user }: { user: TopbarUser }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <div className="px-2 py-1.5 text-xs text-muted-foreground">
+              v{process.env.NEXT_PUBLIC_APP_VERSION}
+            </div>
+            <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" onClick={handleSignOut} className="justify-center">
               <LogOutIcon />
               Sair
