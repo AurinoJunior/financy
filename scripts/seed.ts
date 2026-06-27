@@ -46,7 +46,7 @@ async function clearDatabase() {
 }
 
 async function createUser() {
-  console.log(`👤 Criando usuária ${SEED_EMAIL}...`)
+  console.log(`👤 Criando usuária ${SEED_EMAIL}`)
   await auth.api.signUpEmail({
     body: { email: SEED_EMAIL, password: SEED_PASSWORD, name: SEED_NAME },
   })
@@ -54,7 +54,7 @@ async function createUser() {
   const [maria] = await db.select().from(user).where(eq(user.email, SEED_EMAIL))
   if (!maria) throw new Error("Falha ao criar usuária após signUpEmail")
 
-  console.log(`   Criada com id ${maria.id}\n`)
+  console.log(`   Criada com id ${maria.id} e senha ${SEED_PASSWORD}\n`)
   return maria
 }
 
