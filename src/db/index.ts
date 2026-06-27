@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
-import * as appSchema from "./app-schema"
-import * as authSchema from "./auth-schema"
+import * as schema from "./schema"
 
 const connectionString = process.env.DATABASE_URL
 
@@ -19,4 +18,4 @@ if (process.env.NODE_ENV !== "production") {
   globalForDb.client = client
 }
 
-export const db = drizzle(client, { schema: { appSchema, authSchema } })
+export const db = drizzle(client, { schema })

@@ -6,9 +6,10 @@ Camada de acesso ao banco de dados. Usa **Drizzle ORM** com **PostgreSQL**.
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `index.ts` | Instância do `db` (singleton com reuso de conexão em dev) — passa schemas como `{ appSchema, authSchema }` |
+| `index.ts` | Instância do `db` (singleton com reuso de conexão em dev) |
+| `schema.ts` | Barrel — re-exporta `auth-schema` e `app-schema` |
 | `auth-schema.ts` | Tabelas geradas pelo Better Auth (`user`, `session`, `account`, `verification`) — não editar manualmente |
-| `app-schema.ts` | Barrel — re-exporta todos os schemas da aplicação em ordem alfabética |
+| `app-schema.ts` | Barrel — re-exporta todos os schemas da aplicação |
 | `category-schema.ts` | Tabela `category` |
 | `csv-import-schema.ts` | Tabela `csv_import` |
 | `transaction-schema.ts` | Tabela `transaction` |
@@ -34,4 +35,4 @@ Camada de acesso ao banco de dados. Usa **Drizzle ORM** com **PostgreSQL**.
 
 ## Importações
 
-Importe tabelas e tipos diretamente do arquivo de schema específico (`@/db/category-schema`, `@/db/transaction-schema`, etc.) ou via barrel `@/db/app-schema`. O arquivo `schema.ts` foi removido — não usar mais esse caminho.
+Prefira sempre importar de `@/db/schema` (re-exporta tudo). Importe do arquivo específico apenas quando quiser deixar explícita a dependência entre schemas.
