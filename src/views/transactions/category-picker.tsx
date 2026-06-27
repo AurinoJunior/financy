@@ -75,7 +75,9 @@ export function CategoryPicker({
                   <Icon className="size-2.5" />
                 </span>
                 <span className="flex-1 whitespace-nowrap">{c.name}</span>
-                {c.id === categoryId && <span className="ml-auto size-1.5 rounded-full bg-primary" />}
+                {c.id === categoryId && (
+                  <span className="ml-auto size-1.5 rounded-full bg-primary" />
+                )}
               </DropdownMenuItem>
             )
           })}

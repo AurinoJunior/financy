@@ -1,6 +1,6 @@
 "use client"
 
-import { CalendarIcon, EyeIcon, EyeOffIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { PlusIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import { deleteRecurringBill, toggleRecurringBill } from "@/app/(app)/recorrentes/actions"
@@ -17,9 +17,8 @@ import {
 } from "@/components/ui/dialog"
 import type { RecurringBill } from "@/db/app-schema"
 import { formatBRL } from "@/lib/format"
-import { cn } from "@/lib/utils"
-import { PAYMENT_TYPE_LABELS, type PaymentType } from "@/lib/validations/recurring-bill"
 import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
+import { RecurringBillCard } from "./recurring-bill-card"
 import { RecurringBillDialog } from "./recurring-bill-dialog"
 
 export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
@@ -118,65 +117,14 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
                     .slice()
                     .sort((a, b) => a.dueDay - b.dueDay)
                     .map((bill) => (
-                      <Card
+                      <RecurringBillCard
                         key={bill.id}
-                        className={cn(
-                          "group relative gap-4 p-5 transition-opacity",
-                          !bill.active && "opacity-50",
-                        )}
-                      >
-                        {/* top row: name + actions */}
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="flex-1 truncate text-base font-semibold text-muted-foreground">
-                            {bill.name}
-                          </span>
-                          <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              disabled={busyId === bill.id}
-                              onClick={() => handleToggle(bill)}
-                              aria-label={bill.active ? "Ocultar da soma" : "Incluir na soma"}
-                            >
-                              {bill.active ? <EyeIcon /> : <EyeOffIcon />}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              aria-label="Editar"
-                              onClick={() => openEdit(bill)}
-                            >
-                              <PencilIcon />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              aria-label="Excluir"
-                              onClick={() => setDeleting(bill)}
-                            >
-                              <Trash2Icon />
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* amount */}
-                        <p className="text-2xl font-bold tabular-nums text-white">
-                          {formatBRL(bill.amount)}
-                        </p>
-
-                        {/* bottom row: badges */}
-                        <div className="flex flex-wrap items-center gap-2">
-                          {bill.paymentType && (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-muted-foreground">
-                              {PAYMENT_TYPE_LABELS[bill.paymentType as PaymentType]}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-muted-foreground">
-                            <CalendarIcon className="size-3" />
-                            dia {bill.dueDay}
-                          </span>
-                        </div>
-                      </Card>
+                        bill={bill}
+                        busyId={busyId}
+                        onToggle={handleToggle}
+                        onEdit={openEdit}
+                        onDelete={setDeleting}
+                      />
                     ))}
                 </div>
               </section>
@@ -191,7 +139,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
           <DialogHeader>
             <DialogTitle>Excluir conta</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir “{deleting?.name}”?
+              Tem certeza que deseja excluir "{deleting?.name}"?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

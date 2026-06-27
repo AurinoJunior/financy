@@ -93,7 +93,11 @@ export function Topbar({ user }: { user: TopbarUser }) {
               v{process.env.NEXT_PUBLIC_APP_VERSION}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={handleSignOut} className="justify-center">
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={handleSignOut}
+              className="justify-center"
+            >
               <LogOutIcon />
               Sair
             </DropdownMenuItem>

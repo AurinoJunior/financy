@@ -4,22 +4,14 @@ import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { deleteCategory } from "@/app/(app)/configuracoes/actions"
-import { FinancialPlanningView } from "@/components/financial-plan/financial-planning-view"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import type { Category, FinancialPlan } from "@/db/app-schema"
 import { CATEGORY_TYPE_LABELS, getCategoryIcon } from "@/lib/categories"
 import { useCategoryDialog } from "@/stores/category-dialog"
+import { FinancialPlanningView } from "@/views/financial-plan/financial-planning-view"
 import { CategoryDialog } from "./category-dialog"
+import { DeleteCategoryDialog } from "./delete-category-dialog"
 
 export function CategoriesView({
   categories,
@@ -126,23 +118,12 @@ export function CategoriesView({
 
       <CategoryDialog />
 
-      {/* TODO: transformar em componente */}
-      <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Excluir categoria</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir “{deleting?.name}”? Essa ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" type="button" />}>Cancelar</DialogClose>
-            <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting}>
-              {isDeleting ? "Excluindo..." : "Excluir"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteCategoryDialog
+        category={deleting}
+        isDeleting={isDeleting}
+        onConfirm={confirmDelete}
+        onClose={() => setDeleting(null)}
+      />
     </div>
   )
 }
