@@ -4,8 +4,8 @@ import { and, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { recurringBill } from "@/db/schema"
-import { getSession } from "@/lib/get-session"
-import { type RecurringBillInput, recurringBillSchema } from "@/lib/validations/recurring-bill"
+import { getSession } from "@/auth/session"
+import { type RecurringBillInput, recurringBillSchema } from "@/validations/recurring-bill"
 
 type ActionResult = { ok: true } | { ok: false; error: string }
 

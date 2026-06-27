@@ -8,12 +8,10 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isAuthRoute = authRoutes.includes(pathname)
 
-  // Sem sessão tentando acessar área logada → manda pro login.
   if (!sessionCookie && !isAuthRoute) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // Já logado tentando acessar login/registro → manda pra dashboard.
   if (sessionCookie && isAuthRoute) {
     return NextResponse.redirect(new URL("/", request.url))
   }

@@ -1,8 +1,8 @@
 import { asc, eq } from "drizzle-orm"
-import { CategoriesView } from "@/components/categories/categories-view"
 import { db } from "@/db"
 import { category, financialPlan } from "@/db/schema"
-import { getSession } from "@/lib/get-session"
+import { getSession } from "@/auth/session"
+import { CategoriesView } from "@/views/categories/categories-view"
 
 export default async function ConfiguracoesPage() {
   const session = await getSession()

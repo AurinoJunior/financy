@@ -5,13 +5,13 @@ import { and, eq, inArray, isNull } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { category, csvImport, transaction } from "@/db/schema"
-import { categorizeWithAI } from "@/lib/ai-categorize"
-import { getSession } from "@/lib/get-session"
+import { categorizeWithAI } from "@/services/ai-categorize"
+import { getSession } from "@/auth/session"
 import {
   type ImportPayload,
   importPayloadSchema,
   type ParsedRow,
-} from "@/lib/validations/transaction"
+} from "@/validations/transaction"
 
 function computeContentHash(date: string, amount: number, description: string): string {
   return createHash("sha256").update(`${date}|${amount}|${description}`).digest("hex")
