@@ -23,7 +23,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
             Importe um extrato para descobrir para onde vai o seu dinheiro.
           </p>
         </div>
-        <Button render={<Link href="/transacoes" />}>Importar CSV</Button>
+        <Button nativeButton={false} render={<Link href="/transacoes" />}>Importar CSV</Button>
       </Card>
     )
   }

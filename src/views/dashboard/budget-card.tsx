@@ -24,7 +24,7 @@ export function BudgetCard({ data }: { data: DashboardData }) {
               Defina sua renda mensal no planejamento financeiro para comparar o planejado com o
               real.
             </p>
-            <Button variant="outline" size="sm" render={<Link href="/configuracoes" />}>
+            <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/configuracoes" />}>
               <Settings2Icon className="size-3.5" />
               Configurar
             </Button>
