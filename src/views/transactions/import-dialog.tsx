@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FilterSelect } from "@/components/ui/filter-select"
-import { type AccountType, BANKS } from "@/lib/banks"
+import { type AccountType, BANKS } from "@/constants/banks"
 import {
   type BankFormat,
   type ColumnMapping,
@@ -23,9 +23,9 @@ import {
   getAutoMapping,
   isFlipSign,
   normalizeRow,
-} from "@/lib/csv"
-import { formatBRL, formatDateBr } from "@/lib/format"
-import { cn } from "@/lib/utils"
+} from "@/utils/csv"
+import { formatBRL, formatDateBr } from "@/utils/format"
+import { cn } from "@/utils/cn"
 
 type RawRow = Record<string, string>
 

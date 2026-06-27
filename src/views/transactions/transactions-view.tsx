@@ -14,9 +14,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { FilterSelect } from "@/components/ui/filter-select"
 import type { Category, Transaction } from "@/db/app-schema"
-import { ACCOUNT_TYPE_LABELS } from "@/lib/banks"
-import { formatBRL } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { ACCOUNT_TYPE_LABELS } from "@/constants/banks"
+import { formatBRL } from "@/utils/format"
+import { cn } from "@/utils/cn"
 import {
   PERIOD_LABELS,
   PERIODS,

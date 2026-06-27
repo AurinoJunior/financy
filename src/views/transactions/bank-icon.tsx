@@ -1,4 +1,4 @@
-import { getBank } from "@/lib/banks"
+import { getBank } from "@/constants/banks"
 
 export function BankIcon({ bank, size = 40 }: { bank: string | null | undefined; size?: number }) {
   const b = getBank(bank)

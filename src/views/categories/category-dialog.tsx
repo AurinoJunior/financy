@@ -23,9 +23,9 @@ import {
   CATEGORY_TYPE_LABELS,
   CATEGORY_TYPES,
   getCategoryIcon,
-} from "@/lib/categories"
-import { cn } from "@/lib/utils"
-import { type CategoryInput, categorySchema } from "@/lib/validations/category"
+} from "@/constants/categories"
+import { cn } from "@/utils/cn"
+import { type CategoryInput, categorySchema } from "@/validations/category"
 import { useCategoryDialog } from "@/stores/category-dialog"
 
 const emptyValues: CategoryInput = {

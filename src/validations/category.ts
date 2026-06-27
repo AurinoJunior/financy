@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { CATEGORY_TYPES } from "@/lib/categories"
+import { CATEGORY_TYPES } from "@/constants/categories"
 
 export const categorySchema = z.object({
   name: z.string().trim().min(1, "Informe um nome").max(40, "Nome muito longo"),

@@ -1,8 +1,8 @@
 import { RotateCcwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { maskCurrencyInput } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { maskCurrencyInput } from "@/utils/format"
+import { cn } from "@/utils/cn"
 import { GROUPS, type GroupKey } from "./plan-constants"
 
 export function PlanSlidersCard({

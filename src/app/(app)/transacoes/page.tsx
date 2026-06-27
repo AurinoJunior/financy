@@ -1,7 +1,7 @@
 import { asc, desc, eq } from "drizzle-orm"
 import { db } from "@/db"
 import { category, transaction } from "@/db/schema"
-import { getSession } from "@/lib/get-session"
+import { getSession } from "@/auth/session"
 import { TransactionsView } from "@/views/transactions/transactions-view"
 
 export default async function TransacoesPage() {

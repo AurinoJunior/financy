@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { RecurringBill } from "@/db/app-schema"
-import { formatBRL } from "@/lib/format"
+import { formatBRL } from "@/utils/format"
 import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
 import { RecurringBillCard } from "./recurring-bill-card"
 import { RecurringBillDialog } from "./recurring-bill-dialog"

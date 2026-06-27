@@ -4,15 +4,15 @@ services:
     container_name: financy-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-financy}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-financy}
-      POSTGRES_DB: ${POSTGRES_DB:-financy}
+      POSTGRES_USER: "financy"
+      POSTGRES_PASSWORD: "financy"
+      POSTGRES_DB: "financy"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - financy_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-financy} -d ${POSTGRES_DB:-financy}"]
+      test: ["CMD-SHELL", "pg_isready -U financy -d financy"]
       interval: 5s
       timeout: 5s
       retries: 5

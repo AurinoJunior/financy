@@ -1,8 +1,8 @@
 import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import type { DashboardData } from "@/lib/dashboard"
-import { formatBRL } from "@/lib/format"
+import type { DashboardData } from "@/views/dashboard/data"
+import { formatBRL } from "@/utils/format"
 
 export function CategoryExpensesCard({ data }: { data: DashboardData }) {
   return (

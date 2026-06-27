@@ -12,9 +12,9 @@ import {
   transaction,
 } from "../src/db/app-schema"
 import { account, session, user, verification } from "../src/db/auth-schema"
-import { auth } from "../src/lib/auth"
-import type { ColumnMapping } from "../src/lib/csv"
-import { detectBankFormat, getAutoMapping, isFlipSign, normalizeRow } from "../src/lib/csv"
+import { auth } from "../src/auth/server"
+import type { ColumnMapping } from "../src/utils/csv"
+import { detectBankFormat, getAutoMapping, isFlipSign, normalizeRow } from "../src/utils/csv"
 
 const SEED_EMAIL = "maria@financy.dev"
 const SEED_PASSWORD = "financy123"

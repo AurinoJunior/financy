@@ -2,9 +2,9 @@ import { Settings2Icon } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { DashboardData } from "@/lib/dashboard"
-import { formatBRL } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import type { DashboardData } from "@/views/dashboard/data"
+import { formatBRL } from "@/utils/format"
+import { cn } from "@/utils/cn"
 
 export function BudgetCard({ data }: { data: DashboardData }) {
   return (

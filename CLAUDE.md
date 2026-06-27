@@ -20,13 +20,17 @@ src/
     (app)/          # Rotas protegidas (requer sessão)
     (auth)/         # Login e registro
     api/auth/       # Handlers do Better Auth + utilitários de sessão
+  auth/             # Instâncias Better Auth: server.ts, client.ts, session.ts
+  services/         # Integrações externas (HTTP, env vars) — nunca importar no client
+  constants/        # Dados estáticos: categories.ts, banks.ts
+  utils/            # Funções puras sem side effects: format.ts, cn.ts, csv.ts
+  validations/      # Schemas Zod: category.ts, recurring-bill.ts, transaction.ts
+  views/            # Componentes de página e seus sub-componentes de feature
   components/
     ui/             # Primitivos shadcn (não editar diretamente)
-    [feature]/      # Componentes por domínio (transactions, categories, etc.)
   db/               # Schema Drizzle e conexão
-  lib/              # Utilitários, validações Zod, lógica de negócio
   stores/           # Estado global com Zustand (apenas UI state)
-scripts/            # Scripts Node.js (seed, testes manuais)
+scripts/            # Scripts Node.js (seed)
 exemplos/           # CSVs de exemplo para testes e seed
 ```
 
@@ -34,11 +38,13 @@ exemplos/           # CSVs de exemplo para testes e seed
 
 **Server Actions** são o padrão para mutações — ficam em `actions.ts` dentro da pasta da rota. Toda action valida a sessão como primeira instrução.
 
-**Componentes Client** usam o sufixo `"use client"` e ficam em `src/components/[feature]/`. Páginas (`page.tsx`) são Server Components que buscam dados e passam para componentes client.
+**Componentes Client** usam `"use client"` e ficam em `src/views/[feature]/`. Páginas (`page.tsx`) são Server Components que buscam dados e passam para a view correspondente.
 
-**Valores monetários** são sempre armazenados em centavos (inteiro). Formatação acontece só na camada de apresentação via `src/lib/format.ts`.
+**Valores monetários** são sempre armazenados em centavos (inteiro). Formatação acontece só na camada de apresentação via `src/utils/format.ts`.
 
 **Proteção de rotas** é feita pelo `src/proxy.ts` (equivalente ao middleware do Next.js 16). O layout `(app)/layout.tsx` valida a sessão no banco como segunda linha de defesa e redireciona para `/api/auth/clear-session` em caso de cookie inválido.
+
+**`src/services/`** contém código server-side que faz chamadas HTTP ou usa variáveis de ambiente secretas. Nunca importar em componentes client.
 
 ## Comandos úteis
 

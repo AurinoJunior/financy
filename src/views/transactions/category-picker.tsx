@@ -11,8 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { Category } from "@/db/app-schema"
-import { getCategoryIcon } from "@/lib/categories"
-import { cn } from "@/lib/utils"
+import { getCategoryIcon } from "@/constants/categories"
+import { cn } from "@/utils/cn"
 
 export function CategoryPicker({
   transactionId,

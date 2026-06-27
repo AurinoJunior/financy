@@ -1,4 +1,4 @@
-import type { ParsedRow } from "@/lib/validations/transaction"
+import type { ParsedRow } from "@/validations/transaction"
 
 export type ColumnMapping = {
   date: string
