@@ -80,15 +80,14 @@ export function computeDashboard(
       income += t.amount
       continue
     }
+    const cat = t.categoryId ? categoryById.get(t.categoryId) : null
+    if (cat?.type === "income") continue
     expenses += t.amount
     const key = t.categoryId ?? "none"
     buckets.set(key, (buckets.get(key) ?? 0) + t.amount)
 
-    if (t.categoryId) {
-      const cat = categoryById.get(t.categoryId)
-      if (cat?.type === "essential") essentialReal += t.amount
-      else if (cat?.type === "non_essential") nonEssentialReal += t.amount
-    }
+    if (cat?.type === "essential") essentialReal += t.amount
+    else if (cat?.type === "non_essential") nonEssentialReal += t.amount
   }
 
   const pctBase = plan?.simulationIncome ?? (expenses > 0 ? expenses : null)
