@@ -11,7 +11,7 @@ export const category = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    type: text("type").notNull().default("non_essential"), // 'essential' | 'non_essential'
+    type: text("type").notNull().default("non_essential"), // 'essential' | 'non_essential' | 'income'
     color: text("color").notNull(),
     icon: text("icon").notNull(),
     isDefault: boolean("is_default").default(false).notNull(),

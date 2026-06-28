@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { FilterSelect } from "@/components/ui/filter-select"
 import { type AccountType, BANKS } from "@/constants/banks"
+import { cn } from "@/utils/cn"
 import {
   type BankFormat,
   type ColumnMapping,
@@ -25,7 +26,6 @@ import {
   normalizeRow,
 } from "@/utils/csv"
 import { formatBRL, formatDateBr } from "@/utils/format"
-import { cn } from "@/utils/cn"
 
 type RawRow = Record<string, string>
 
@@ -159,7 +159,7 @@ export function ImportDialog() {
       </Button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="min-w-fit">
           <DialogHeader>
             <DialogTitle>Importar transações</DialogTitle>
             <DialogDescription>
@@ -215,7 +215,7 @@ export function ImportDialog() {
                     {ignored > 0 && ` · ${ignored} ignoradas`}
                   </div>
                   <div className="max-h-48 overflow-y-auto">
-                    {validRows.slice(0, 6).map((r, i) => (
+                    {validRows.map((r, i) => (
                       <div
                         key={`${r.date}-${r.amount}-${r.description}`}
                         className={cn(

@@ -31,8 +31,13 @@ async function categorizeBatch(
   apiKey: string,
   model: string,
 ): Promise<Map<string, string>> {
+  const typeLabel = (type: string) => {
+    if (type === "essential") return "essencial"
+    if (type === "income") return "receita/patrimônio"
+    return "não essencial"
+  }
   const categoryLines = categories
-    .map((c) => `- ${c.id}: ${c.name} (${c.type === "essential" ? "essencial" : "não essencial"})`)
+    .map((c) => `- ${c.id}: ${c.name} (${typeLabel(c.type)})`)
     .join("\n")
   const txLines = batch.map((t) => `- ${t.id}: ${t.description}`).join("\n")
 

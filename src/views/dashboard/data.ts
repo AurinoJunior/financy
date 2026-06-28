@@ -5,6 +5,7 @@ export type CategorySlice = {
   name: string
   color: string
   icon: string
+  type: string
   total: number
   pct: number
 }
@@ -80,15 +81,14 @@ export function computeDashboard(
       income += t.amount
       continue
     }
+    const cat = t.categoryId ? categoryById.get(t.categoryId) : null
+    if (cat?.type === "income") continue
     expenses += t.amount
     const key = t.categoryId ?? "none"
     buckets.set(key, (buckets.get(key) ?? 0) + t.amount)
 
-    if (t.categoryId) {
-      const cat = categoryById.get(t.categoryId)
-      if (cat?.type === "essential") essentialReal += t.amount
-      else if (cat?.type === "non_essential") nonEssentialReal += t.amount
-    }
+    if (cat?.type === "essential") essentialReal += t.amount
+    else if (cat?.type === "non_essential") nonEssentialReal += t.amount
   }
 
   const pctBase = plan?.simulationIncome ?? (expenses > 0 ? expenses : null)
@@ -100,6 +100,7 @@ export function computeDashboard(
         name: cat?.name ?? UNCATEGORIZED.name,
         color: cat?.color ?? UNCATEGORIZED.color,
         icon: cat?.icon ?? UNCATEGORIZED.icon,
+        type: cat?.type ?? "non_essential",
         total,
         pct: pctBase ? (total / pctBase) * 100 : 0,
       }

@@ -14,7 +14,7 @@ export default async function TransacoesPage() {
       .select()
       .from(transaction)
       .where(eq(transaction.userId, userId))
-      .orderBy(desc(transaction.date), desc(transaction.createdAt)),
+      .orderBy(desc(transaction.date), desc(transaction.createdAt), asc(transaction.id)),
     db.select().from(category).where(eq(category.userId, userId)).orderBy(asc(category.name)),
   ])
 

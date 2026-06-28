@@ -24,9 +24,9 @@ import {
   CATEGORY_TYPES,
   getCategoryIcon,
 } from "@/constants/categories"
+import { useCategoryDialog } from "@/stores/category-dialog"
 import { cn } from "@/utils/cn"
 import { type CategoryInput, categorySchema } from "@/validations/category"
-import { useCategoryDialog } from "@/stores/category-dialog"
 
 const emptyValues: CategoryInput = {
   name: "",
@@ -81,7 +81,7 @@ export function CategoryDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="min-w-fit">
         <DialogHeader>
           <DialogTitle>{editing ? "Editar categoria" : "Nova categoria"}</DialogTitle>
           <DialogDescription>Categorias ajudam a IA a classificar seus gastos.</DialogDescription>
@@ -96,14 +96,14 @@ export function CategoryDialog() {
 
           <div className="grid gap-2">
             <Label>Tipo</Label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {CATEGORY_TYPES.map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setValue("type", t, { shouldValidate: true })}
                   className={cn(
-                    "rounded-lg border border-border px-3 py-2 text-sm transition-colors cursor-pointer",
+                    "rounded-lg border border-border px-3 py-2 text-sm transition-colors cursor-pointer whitespace-nowrap min-w-fit",
                     type === t
                       ? "border-primary bg-primary/10 text-foreground"
                       : "text-muted-foreground hover:bg-muted",

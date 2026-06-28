@@ -31,6 +31,7 @@ export function CategoriesView({
       type: "non_essential" as const,
       items: categories.filter((c) => c.type === "non_essential"),
     },
+    { type: "income" as const, items: categories.filter((c) => c.type === "income") },
   ]
 
   async function confirmDelete() {
