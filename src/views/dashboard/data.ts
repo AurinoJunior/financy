@@ -5,6 +5,7 @@ export type CategorySlice = {
   name: string
   color: string
   icon: string
+  type: string
   total: number
   pct: number
 }
@@ -99,6 +100,7 @@ export function computeDashboard(
         name: cat?.name ?? UNCATEGORIZED.name,
         color: cat?.color ?? UNCATEGORIZED.color,
         icon: cat?.icon ?? UNCATEGORIZED.icon,
+        type: cat?.type ?? "non_essential",
         total,
         pct: pctBase ? (total / pctBase) * 100 : 0,
       }
