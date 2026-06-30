@@ -16,14 +16,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { RecurringBill } from "@/db/app-schema"
-import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
+import { useRecurringBillModal } from "@/stores/recurring-bill-modal"
 import { formatBRL } from "@/utils/format"
 import { RecurringBillCard } from "./recurring-bill-card"
-import { RecurringBillDialog } from "./recurring-bill-dialog"
+import { RecurringBillModal } from "./recurring-bill-modal"
 
 export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
-  const openCreate = useRecurringBillDialog((s) => s.openCreate)
-  const openEdit = useRecurringBillDialog((s) => s.openEdit)
+  const openCreate = useRecurringBillModal((s) => s.openCreate)
+  const openEdit = useRecurringBillModal((s) => s.openEdit)
   const [deleting, setDeleting] = useState<RecurringBill | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
@@ -132,7 +132,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
         )
       )}
 
-      <RecurringBillDialog />
+      <RecurringBillModal />
 
       <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
         <DialogContent>

@@ -9,7 +9,11 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
-import { categorizeUncategorized, deleteTransaction } from "@/app/(app)/transacoes/actions"
+import {
+  type AiSuggestion,
+  categorizeUncategorized,
+  deleteTransaction,
+} from "@/app/(app)/transacoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { FilterSelect } from "@/components/ui/filter-select"
@@ -24,9 +28,10 @@ import {
 import { cn } from "@/utils/cn"
 import { formatBRL } from "@/utils/format"
 import { BankIcon } from "./bank-icon"
-import { CategorizeDialog } from "./categorize-dialog"
+import { CategorizeModal } from "./categorize-modal"
+import { CategorizeReviewModal } from "./categorize-review-modal"
 import { CategoryPicker } from "./category-picker"
-import { ImportDialog } from "./import-dialog"
+import { ImportModal } from "./import-modal"
 
 function matchesPeriod(dateIso: string, period: Period): boolean {
   if (period === "all") return true
@@ -63,7 +68,11 @@ export function TransactionsView({
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [categorizingOpen, setCategorizingOpen] = useState(false)
   const [categorizingDone, setCategorizingDone] = useState(false)
-  const categorizeResultRef = useRef<Awaited<ReturnType<typeof categorizeUncategorized>> | null>(null)
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [suggestions, setSuggestions] = useState<AiSuggestion[]>([])
+  const categorizeResultRef = useRef<Awaited<ReturnType<typeof categorizeUncategorized>> | null>(
+    null,
+  )
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
 
@@ -136,9 +145,12 @@ export function TransactionsView({
       toast.error(result.error)
       return
     }
-    toast.success(
-      result.count > 0 ? `${result.count} transações categorizadas` : "Nada para categorizar",
-    )
+    if (result.suggestions.length === 0) {
+      toast.success("Nada para categorizar")
+      return
+    }
+    setSuggestions(result.suggestions)
+    setReviewOpen(true)
   }, [])
 
   return (
@@ -162,12 +174,18 @@ export function TransactionsView({
               {`Categorizar com IA (${uncategorizedCount})`}
             </Button>
           )}
-          <CategorizeDialog
+          <CategorizeModal
             open={categorizingOpen}
             done={categorizingDone}
             onClose={handleCategorizeClose}
           />
-          <ImportDialog />
+          <CategorizeReviewModal
+            open={reviewOpen}
+            suggestions={suggestions}
+            categories={categories}
+            onClose={() => setReviewOpen(false)}
+          />
+          <ImportModal />
         </div>
       </div>
 

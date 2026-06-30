@@ -24,7 +24,7 @@ import {
   CATEGORY_TYPES,
   getCategoryIcon,
 } from "@/constants/categories"
-import { useCategoryDialog } from "@/stores/category-dialog"
+import { useCategoryModal } from "@/stores/category-modal"
 import { cn } from "@/utils/cn"
 import { type CategoryInput, categorySchema } from "@/validations/category"
 
@@ -35,8 +35,8 @@ const emptyValues: CategoryInput = {
   icon: "other",
 }
 
-export function CategoryDialog() {
-  const { open, editing, setOpen, close } = useCategoryDialog()
+export function CategoryModal() {
+  const { open, editing, setOpen, close } = useCategoryModal()
   const {
     register,
     handleSubmit,

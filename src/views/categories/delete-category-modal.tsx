@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import type { Category } from "@/db/app-schema"
 
-export function DeleteCategoryDialog({
+export function DeleteCategoryModal({
   category,
   isDeleting,
   onConfirm,

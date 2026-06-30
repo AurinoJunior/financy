@@ -19,7 +19,7 @@ import {
 import { FilterSelect } from "@/components/ui/filter-select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
+import { useRecurringBillModal } from "@/stores/recurring-bill-modal"
 import { cn } from "@/utils/cn"
 import { parseBrAmount } from "@/utils/csv"
 import { maskCurrencyInput } from "@/utils/format"
@@ -65,8 +65,8 @@ const PAYMENT_OPTIONS = [
   ...PAYMENT_TYPES.map((t) => ({ value: t, label: PAYMENT_TYPE_LABELS[t] })),
 ]
 
-export function RecurringBillDialog() {
-  const { open, editing, setOpen, close } = useRecurringBillDialog()
+export function RecurringBillModal() {
+  const { open, editing, setOpen, close } = useRecurringBillModal()
   const {
     register,
     handleSubmit,

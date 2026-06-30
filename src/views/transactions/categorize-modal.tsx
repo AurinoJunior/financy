@@ -10,13 +10,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
-interface CategorizeDialogProps {
+interface CategorizeModalProps {
   open: boolean
   done: boolean
   onClose: () => void
 }
 
-export function CategorizeDialog({ open, done, onClose }: CategorizeDialogProps) {
+export function CategorizeModal({ open, done, onClose }: CategorizeModalProps) {
   const [progress, setProgress] = useState(0)
   const [slowTransition, setSlowTransition] = useState(false)
 

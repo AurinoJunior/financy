@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import type { Category } from "@/db/app-schema"
 
-type CategoryDialogState = {
+type CategoryModalState = {
   open: boolean
   editing: Category | null
   openCreate: () => void
@@ -10,7 +10,7 @@ type CategoryDialogState = {
   close: () => void
 }
 
-export const useCategoryDialog = create<CategoryDialogState>((set) => ({
+export const useCategoryModal = create<CategoryModalState>((set) => ({
   open: false,
   editing: null,
   openCreate: () => set({ open: true, editing: null }),

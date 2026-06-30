@@ -34,7 +34,7 @@ const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string }[] = [
   { value: "credit", label: "Crédito" },
 ]
 
-export function ImportDialog() {
+export function ImportModal() {
   const [open, setOpen] = useState(false)
   const [bank, setBank] = useState<string>("")
   const [accountType, setAccountType] = useState<AccountType | "">("")

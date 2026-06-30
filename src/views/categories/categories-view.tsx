@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CATEGORY_TYPE_LABELS, getCategoryIcon } from "@/constants/categories"
 import type { Category, FinancialPlan } from "@/db/app-schema"
-import { useCategoryDialog } from "@/stores/category-dialog"
+import { useCategoryModal } from "@/stores/category-modal"
 import { FinancialPlanningView } from "@/views/financial-plan/financial-planning-view"
-import { CategoryDialog } from "./category-dialog"
-import { DeleteCategoryDialog } from "./delete-category-dialog"
+import { CategoryModal } from "./category-modal"
+import { DeleteCategoryModal } from "./delete-category-modal"
 
 export function CategoriesView({
   categories,
@@ -20,8 +20,8 @@ export function CategoriesView({
   categories: Category[]
   plan: FinancialPlan | null
 }) {
-  const openCreate = useCategoryDialog((s) => s.openCreate)
-  const openEdit = useCategoryDialog((s) => s.openEdit)
+  const openCreate = useCategoryModal((s) => s.openCreate)
+  const openEdit = useCategoryModal((s) => s.openEdit)
   const [deleting, setDeleting] = useState<Category | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -117,9 +117,9 @@ export function CategoriesView({
       <h2 className="text-2xl font-semibold">Planejamento financeiro</h2>
       <FinancialPlanningView plan={plan} />
 
-      <CategoryDialog />
+      <CategoryModal />
 
-      <DeleteCategoryDialog
+      <DeleteCategoryModal
         category={deleting}
         isDeleting={isDeleting}
         onConfirm={confirmDelete}

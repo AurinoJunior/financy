@@ -88,8 +88,32 @@ export async function deleteTransaction(id: string): Promise<ActionResult> {
   return { ok: true }
 }
 
-type CategorizeResult = { ok: true; count: number } | { ok: false; error: string }
+export async function deleteTransactions(ids: string[]): Promise<ActionResult> {
+  const session = await getSession()
+  if (!session) return { ok: false, error: "Não autenticado" }
+  if (ids.length === 0) return { ok: true }
 
+  await db
+    .delete(transaction)
+    .where(and(eq(transaction.userId, session.user.id), inArray(transaction.id, ids)))
+  revalidatePath("/transacoes")
+  revalidatePath("/")
+  return { ok: true }
+}
+
+export type AiSuggestion = {
+  id: string
+  description: string
+  amount: number
+  type: string
+  bank: string | null
+  accountType: string | null
+  categoryId: string | null
+}
+
+type CategorizeResult = { ok: true; suggestions: AiSuggestion[] } | { ok: false; error: string }
+
+// Retorna sugestões da IA SEM salvar no banco — o usuário revisa no modal antes de confirmar.
 export async function categorizeUncategorized(): Promise<CategorizeResult> {
   const session = await getSession()
   if (!session) return { ok: false, error: "Não autenticado" }
@@ -100,6 +124,8 @@ export async function categorizeUncategorized(): Promise<CategorizeResult> {
       .select({
         id: transaction.id,
         description: transaction.description,
+        amount: transaction.amount,
+        type: transaction.type,
         bank: transaction.bank,
         accountType: transaction.accountType,
       })
@@ -123,7 +149,7 @@ export async function categorizeUncategorized(): Promise<CategorizeResult> {
       .limit(100),
   ])
 
-  if (uncategorized.length === 0) return { ok: true, count: 0 }
+  if (uncategorized.length === 0) return { ok: true, suggestions: [] }
   if (categories.length === 0) {
     return { ok: false, error: "Crie categorias antes de usar a IA" }
   }
@@ -137,14 +163,46 @@ export async function categorizeUncategorized(): Promise<CategorizeResult> {
     return { ok: false, error: err instanceof Error ? err.message : "Falha na categorização" }
   }
 
-  if (mapping.size === 0) return { ok: true, count: 0 }
+  const suggestions: AiSuggestion[] = uncategorized.map((t) => ({
+    id: t.id,
+    description: t.description,
+    amount: t.amount,
+    type: t.type,
+    bank: t.bank,
+    accountType: t.accountType,
+    categoryId: mapping.get(t.id) ?? null,
+  }))
 
-  // Agrupa por categoria para minimizar updates.
+  return { ok: true, suggestions }
+}
+
+type ApplyResult = { ok: true; count: number } | { ok: false; error: string }
+
+export async function applyCategorizations(
+  items: Array<{ id: string; categoryId: string | null }>,
+): Promise<ApplyResult> {
+  const session = await getSession()
+  if (!session) return { ok: false, error: "Não autenticado" }
+  const userId = session.user.id
+
+  const toUpdate = items.filter((i) => i.categoryId !== null)
+  if (toUpdate.length === 0) return { ok: true, count: 0 }
+
+  const catIds = [...new Set(toUpdate.map((i) => i.categoryId!))]
+  const validCats = await db
+    .select({ id: category.id })
+    .from(category)
+    .where(and(eq(category.userId, userId), inArray(category.id, catIds)))
+
+  const validCatSet = new Set(validCats.map((c) => c.id))
+  const validItems = toUpdate.filter((i) => validCatSet.has(i.categoryId!))
+  if (validItems.length === 0) return { ok: true, count: 0 }
+
   const byCategory = new Map<string, string[]>()
-  for (const [txId, catId] of mapping) {
-    const ids = byCategory.get(catId) ?? []
-    ids.push(txId)
-    byCategory.set(catId, ids)
+  for (const { id, categoryId } of validItems) {
+    const ids = byCategory.get(categoryId!) ?? []
+    ids.push(id)
+    byCategory.set(categoryId!, ids)
   }
 
   await db.transaction(async (tx) => {
@@ -158,7 +216,7 @@ export async function categorizeUncategorized(): Promise<CategorizeResult> {
 
   revalidatePath("/transacoes")
   revalidatePath("/")
-  return { ok: true, count: mapping.size }
+  return { ok: true, count: validItems.length }
 }
 
 export async function setTransactionCategory(

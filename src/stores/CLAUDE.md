@@ -5,20 +5,20 @@ Stores Zustand para **estado de UI** exclusivamente — sem dados de servidor, s
 ## Quando usar uma store
 
 - Estado compartilhado entre componentes client sem relação pai-filho direta
-- Controle de modais/dialogs (aberto, fechado, qual item está sendo editado)
+- Controle de modais (aberto, fechado, qual item está sendo editado)
 - Filtros e seleções de UI que precisam persistir durante a navegação
 
 Dados do servidor (transações, categorias, etc.) ficam em Server Components e são passados como props. A store nunca busca dados — só controla UI.
 
-## Padrão de dialog (criar/editar)
+## Padrão de modal de CRUD (criar/editar)
 
-Todo dialog de CRUD segue este contrato:
+Todo modal de CRUD segue este contrato:
 
 ```ts
 import { create } from "zustand"
 import type { Entidade } from "@/db/[entidade]-schema"
 
-type EntidadeDialogState = {
+type EntidadeModalState = {
   open: boolean
   editing: Entidade | null   // null = modo criação, objeto = modo edição
   openCreate: () => void
@@ -27,7 +27,7 @@ type EntidadeDialogState = {
   close: () => void
 }
 
-export const useEntidadeDialog = create<EntidadeDialogState>((set) => ({
+export const useEntidadeModal = create<EntidadeModalState>((set) => ({
   open: false,
   editing: null,
   openCreate: () => set({ open: true, editing: null }),
@@ -37,7 +37,7 @@ export const useEntidadeDialog = create<EntidadeDialogState>((set) => ({
 }))
 ```
 
-`editing === null` indica criação; `editing !== null` indica edição. O dialog lê esse valor para preencher o formulário e escolher o título.
+`editing === null` indica criação; `editing !== null` indica edição. O modal lê esse valor para preencher o formulário e escolher o título.
 
 ## Padrão de filtros
 
@@ -53,6 +53,6 @@ Isso mantém opções, labels e estado no mesmo arquivo, evitando dessincroniza�
 
 ## Convenções
 
-- Um arquivo por store, nomeado pela feature: `[feature]-dialog.ts`, `[feature]-filters.ts`
-- Exportar apenas o hook (`use[Nome]`) — o type é interno ao arquivo
+- Um arquivo por store, nomeado pela feature: `[feature]-modal.ts`, `[feature]-filters.ts`
+- Exportar apenas o hook (`use[Nome]Modal`) — o type é interno ao arquivo
 - Sem middleware (persist, devtools) — o estado é efêmero por design

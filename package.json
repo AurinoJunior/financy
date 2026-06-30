@@ -1,6 +1,6 @@
 {
   "name": "financy",
-  "version": "29.06.2026",
+  "version": "v29.06.2026",
   "private": true,
   "scripts": {
     "dev": "next dev",
