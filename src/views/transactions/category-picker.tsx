@@ -10,8 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Category } from "@/db/app-schema"
 import { getCategoryIcon } from "@/constants/categories"
+import type { Category } from "@/db/app-schema"
 import { cn } from "@/utils/cn"
 
 export function CategoryPicker({

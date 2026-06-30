@@ -2,9 +2,9 @@ import { Settings2Icon } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { DashboardData } from "@/views/dashboard/data"
-import { formatBRL } from "@/utils/format"
 import { cn } from "@/utils/cn"
+import { formatBRL } from "@/utils/format"
+import type { DashboardData } from "@/views/dashboard/data"
 
 export function BudgetCard({ data }: { data: DashboardData }) {
   return (
@@ -24,7 +24,12 @@ export function BudgetCard({ data }: { data: DashboardData }) {
               Defina sua renda mensal no planejamento financeiro para comparar o planejado com o
               real.
             </p>
-            <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/configuracoes" />}>
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<Link href="/configuracoes" />}
+            >
               <Settings2Icon className="size-3.5" />
               Configurar
             </Button>

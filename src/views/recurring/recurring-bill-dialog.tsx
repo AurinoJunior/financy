@@ -19,15 +19,11 @@ import {
 import { FilterSelect } from "@/components/ui/filter-select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
+import { cn } from "@/utils/cn"
 import { parseBrAmount } from "@/utils/csv"
 import { maskCurrencyInput } from "@/utils/format"
-import { cn } from "@/utils/cn"
-import {
-  PAYMENT_TYPE_LABELS,
-  PAYMENT_TYPES,
-  type PaymentType,
-} from "@/validations/recurring-bill"
-import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
+import { PAYMENT_TYPE_LABELS, PAYMENT_TYPES, type PaymentType } from "@/validations/recurring-bill"
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "Informe um nome").max(60, "Nome muito longo"),

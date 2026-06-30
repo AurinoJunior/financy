@@ -16,8 +16,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { RecurringBill } from "@/db/app-schema"
-import { formatBRL } from "@/utils/format"
 import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
+import { formatBRL } from "@/utils/format"
 import { RecurringBillCard } from "./recurring-bill-card"
 import { RecurringBillDialog } from "./recurring-bill-dialog"
 
@@ -112,7 +112,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
             group.items.length > 0 && (
               <section key={group.label} className="space-y-3">
                 <h3 className="text-base font-medium text-white">{group.label}</h3>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 lg:grid-cols-5">
                   {group.items
                     .slice()
                     .sort((a, b) => a.dueDay - b.dueDay)

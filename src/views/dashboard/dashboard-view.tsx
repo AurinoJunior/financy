@@ -5,10 +5,10 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { DashboardData } from "@/views/dashboard/data"
-import { MonthSelector } from "./month-selector"
 import { BudgetCard } from "./budget-card"
 import { CategoryExpensesCard } from "./category-expenses-card"
 import { FinancialSummary } from "./financial-summary"
+import { MonthSelector } from "./month-selector"
 import { MonthlyExpensesCard } from "./monthly-expenses-card"
 import { TopExpensesCard } from "./top-expenses-card"
 
@@ -23,7 +23,9 @@ export function Dashboard({ data }: { data: DashboardData }) {
             Importe um extrato para descobrir para onde vai o seu dinheiro.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link href="/transacoes" />}>Importar CSV</Button>
+        <Button nativeButton={false} render={<Link href="/transacoes" />}>
+          Importar CSV
+        </Button>
       </Card>
     )
   }

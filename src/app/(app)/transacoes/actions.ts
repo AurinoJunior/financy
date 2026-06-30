@@ -1,17 +1,13 @@
 "use server"
 
 import { createHash } from "node:crypto"
-import { and, eq, inArray, isNull } from "drizzle-orm"
+import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import { getSession } from "@/auth/session"
 import { db } from "@/db"
 import { category, csvImport, transaction } from "@/db/schema"
-import { categorizeWithAI } from "@/services/ai-categorize"
-import { getSession } from "@/auth/session"
-import {
-  type ImportPayload,
-  importPayloadSchema,
-  type ParsedRow,
-} from "@/validations/transaction"
+import { type AiExample, categorizeWithAI } from "@/services/ai-categorize"
+import { type ImportPayload, importPayloadSchema, type ParsedRow } from "@/validations/transaction"
 
 function computeContentHash(date: string, amount: number, description: string): string {
   return createHash("sha256").update(`${date}|${amount}|${description}`).digest("hex")
@@ -99,15 +95,32 @@ export async function categorizeUncategorized(): Promise<CategorizeResult> {
   if (!session) return { ok: false, error: "Não autenticado" }
   const userId = session.user.id
 
-  const [uncategorized, categories] = await Promise.all([
+  const [uncategorized, categories, recentCategorized] = await Promise.all([
     db
-      .select({ id: transaction.id, description: transaction.description })
+      .select({
+        id: transaction.id,
+        description: transaction.description,
+        bank: transaction.bank,
+        accountType: transaction.accountType,
+      })
       .from(transaction)
       .where(and(eq(transaction.userId, userId), isNull(transaction.categoryId))),
     db
       .select({ id: category.id, name: category.name, type: category.type })
       .from(category)
       .where(eq(category.userId, userId)),
+    db
+      .select({
+        description: transaction.description,
+        categoryName: category.name,
+        bank: transaction.bank,
+        accountType: transaction.accountType,
+      })
+      .from(transaction)
+      .innerJoin(category, eq(transaction.categoryId, category.id))
+      .where(and(eq(transaction.userId, userId), isNotNull(transaction.categoryId)))
+      .orderBy(desc(transaction.date))
+      .limit(100),
   ])
 
   if (uncategorized.length === 0) return { ok: true, count: 0 }
@@ -115,9 +128,11 @@ export async function categorizeUncategorized(): Promise<CategorizeResult> {
     return { ok: false, error: "Crie categorias antes de usar a IA" }
   }
 
+  const examples: AiExample[] = recentCategorized
+
   let mapping: Map<string, string>
   try {
-    mapping = await categorizeWithAI(uncategorized, categories)
+    mapping = await categorizeWithAI(uncategorized, categories, examples)
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Falha na categorização" }
   }

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
+import { getSession } from "@/auth/session"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Topbar } from "@/components/topbar"
-import { getSession } from "@/auth/session"
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()

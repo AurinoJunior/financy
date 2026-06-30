@@ -7,23 +7,24 @@ import {
   SparklesIcon,
   Trash2Icon,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { categorizeUncategorized, deleteTransaction } from "@/app/(app)/transacoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { FilterSelect } from "@/components/ui/filter-select"
-import type { Category, Transaction } from "@/db/app-schema"
 import { ACCOUNT_TYPE_LABELS } from "@/constants/banks"
-import { formatBRL } from "@/utils/format"
-import { cn } from "@/utils/cn"
+import type { Category, Transaction } from "@/db/app-schema"
 import {
   PERIOD_LABELS,
   PERIODS,
   type Period,
   useTransactionFilters,
 } from "@/stores/transaction-filters"
+import { cn } from "@/utils/cn"
+import { formatBRL } from "@/utils/format"
 import { BankIcon } from "./bank-icon"
+import { CategorizeDialog } from "./categorize-dialog"
 import { CategoryPicker } from "./category-picker"
 import { ImportDialog } from "./import-dialog"
 
@@ -60,7 +61,9 @@ export function TransactionsView({
 
   const { period, categoryId, setPeriod, setCategoryId } = useTransactionFilters()
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [categorizing, setCategorizing] = useState(false)
+  const [categorizingOpen, setCategorizingOpen] = useState(false)
+  const [categorizingDone, setCategorizingDone] = useState(false)
+  const categorizeResultRef = useRef<Awaited<ReturnType<typeof categorizeUncategorized>> | null>(null)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
 
@@ -116,9 +119,19 @@ export function TransactionsView({
   }
 
   async function handleCategorize() {
-    setCategorizing(true)
+    setCategorizingOpen(true)
+    setCategorizingDone(false)
     const result = await categorizeUncategorized()
-    setCategorizing(false)
+    categorizeResultRef.current = result
+    setCategorizingDone(true)
+  }
+
+  const handleCategorizeClose = useCallback(() => {
+    setCategorizingOpen(false)
+    setCategorizingDone(false)
+    const result = categorizeResultRef.current
+    categorizeResultRef.current = null
+    if (!result) return
     if (!result.ok) {
       toast.error(result.error)
       return
@@ -126,7 +139,7 @@ export function TransactionsView({
     toast.success(
       result.count > 0 ? `${result.count} transações categorizadas` : "Nada para categorizar",
     )
-  }
+  }, [])
 
   return (
     <div className="space-y-8">
@@ -144,11 +157,16 @@ export function TransactionsView({
 
         <div className="ml-auto flex items-center gap-2">
           {uncategorizedCount > 0 && (
-            <Button variant="outline" onClick={handleCategorize} disabled={categorizing}>
+            <Button variant="outline" onClick={handleCategorize} disabled={categorizingOpen}>
               <SparklesIcon />
-              {categorizing ? "Categorizando..." : `Categorizar com IA (${uncategorizedCount})`}
+              {`Categorizar com IA (${uncategorizedCount})`}
             </Button>
           )}
+          <CategorizeDialog
+            open={categorizingOpen}
+            done={categorizingDone}
+            onClose={handleCategorizeClose}
+          />
           <ImportDialog />
         </div>
       </div>

@@ -2,9 +2,9 @@
 
 import { and, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import { getSession } from "@/auth/session"
 import { db } from "@/db"
 import { category, financialPlan } from "@/db/schema"
-import { getSession } from "@/auth/session"
 import { type CategoryInput, categorySchema } from "@/validations/category"
 
 type ActionResult = { ok: true } | { ok: false; error: string }

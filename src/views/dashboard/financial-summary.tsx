@@ -1,8 +1,8 @@
 import { ArrowDownLeftIcon, ArrowUpRightIcon, WalletIcon } from "lucide-react"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { DashboardData } from "@/views/dashboard/data"
-import { formatBRL } from "@/utils/format"
 import { cn } from "@/utils/cn"
+import { formatBRL } from "@/utils/format"
+import type { DashboardData } from "@/views/dashboard/data"
 
 export function FinancialSummary({ data }: { data: DashboardData }) {
   return (

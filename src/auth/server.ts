@@ -1,9 +1,9 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { DEFAULT_CATEGORIES } from "@/constants/categories"
 import { db } from "@/db"
 import * as schema from "@/db/schema"
 import { category } from "@/db/schema"
-import { DEFAULT_CATEGORIES } from "@/constants/categories"
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
