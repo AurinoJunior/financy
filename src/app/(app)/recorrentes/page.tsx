@@ -1,7 +1,7 @@
 import { asc, eq } from "drizzle-orm"
+import { getSession } from "@/auth/session"
 import { db } from "@/db"
 import { recurringBill } from "@/db/schema"
-import { getSession } from "@/auth/session"
 import { RecurringBillsView } from "@/views/recurring/recurring-bills-view"
 
 export default async function RecorrentesPage() {

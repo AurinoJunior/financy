@@ -1,5 +1,5 @@
-import { formatBRL } from "@/utils/format"
 import { cn } from "@/utils/cn"
+import { formatBRL } from "@/utils/format"
 import { GROUPS, type GroupKey } from "./plan-constants"
 
 export function PlanSimulation({

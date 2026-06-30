@@ -1,8 +1,8 @@
 import { RotateCcwIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { maskCurrencyInput } from "@/utils/format"
 import { cn } from "@/utils/cn"
+import { maskCurrencyInput } from "@/utils/format"
 import { GROUPS, type GroupKey } from "./plan-constants"
 
 export function PlanSlidersCard({
@@ -50,7 +50,9 @@ export function PlanSlidersCard({
             <div key={key} className="space-y-2">
               <div className="flex items-baseline justify-between">
                 <span className="text-base font-medium text-white">{label}</span>
-                <span className={cn("text-base font-bold tabular-nums", color)}>{values[key]}%</span>
+                <span className={cn("text-base font-bold tabular-nums", color)}>
+                  {values[key]}%
+                </span>
               </div>
               <input
                 type="range"

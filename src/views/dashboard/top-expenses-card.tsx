@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { DashboardData } from "@/views/dashboard/data"
 import { formatBRL, formatDateBr } from "@/utils/format"
+import type { DashboardData } from "@/views/dashboard/data"
 
 export function TopExpensesCard({ data }: { data: DashboardData }) {
   return (

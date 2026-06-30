@@ -2,8 +2,8 @@ import { CalendarIcon, EyeIcon, EyeOffIcon, PencilIcon, Trash2Icon } from "lucid
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { RecurringBill } from "@/db/app-schema"
-import { formatBRL } from "@/utils/format"
 import { cn } from "@/utils/cn"
+import { formatBRL } from "@/utils/format"
 import { PAYMENT_TYPE_LABELS, type PaymentType } from "@/validations/recurring-bill"
 
 export function RecurringBillCard({

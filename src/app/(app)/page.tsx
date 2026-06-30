@@ -1,9 +1,9 @@
 import { desc, eq } from "drizzle-orm"
+import { getSession } from "@/auth/session"
 import { db } from "@/db"
 import { category, financialPlan, transaction } from "@/db/schema"
-import { computeDashboard } from "@/views/dashboard/data"
-import { getSession } from "@/auth/session"
 import { Dashboard } from "@/views/dashboard/dashboard-view"
+import { computeDashboard } from "@/views/dashboard/data"
 
 export default async function DashboardPage({
   searchParams,

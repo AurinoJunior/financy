@@ -10,18 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Category } from "@/db/app-schema"
 import { getCategoryIcon } from "@/constants/categories"
+import type { Category } from "@/db/app-schema"
 import { cn } from "@/utils/cn"
 
 export function CategoryPicker({
   transactionId,
   categoryId,
   categories,
+  onChange,
 }: {
-  transactionId: string
   categoryId: string | null
   categories: Category[]
+  transactionId?: string
+  onChange?: (categoryId: string | null) => void
 }) {
   const [pending, setPending] = useState(false)
   const current = categories.find((c) => c.id === categoryId) ?? null
@@ -29,6 +31,11 @@ export function CategoryPicker({
 
   async function choose(next: string | null) {
     if (next === categoryId) return
+    if (onChange) {
+      onChange(next)
+      return
+    }
+    if (!transactionId) return
     setPending(true)
     const result = await setTransactionCategory(transactionId, next)
     setPending(false)

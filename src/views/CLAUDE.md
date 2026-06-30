@@ -18,15 +18,17 @@ views/
     transactions-view.tsx       # view principal da rota /transacoes
     bank-icon.tsx
     category-picker.tsx
-    import-dialog.tsx
+    import-modal.tsx
+    categorize-modal.tsx        # modal de progresso da categorização IA
+    categorize-review-modal.tsx # modal de revisão pós-categorização IA
   categories/
     categories-view.tsx         # view principal da rota /configuracoes
-    category-dialog.tsx
-    delete-category-dialog.tsx
+    category-modal.tsx
+    delete-category-modal.tsx
   recurring/
     recurring-bills-view.tsx    # view principal da rota /recorrentes
     recurring-bill-card.tsx
-    recurring-bill-dialog.tsx
+    recurring-bill-modal.tsx
   financial-plan/
     financial-planning-view.tsx # sem rota própria — renderizada dentro de /configuracoes
     plan-sliders-card.tsx
@@ -38,10 +40,20 @@ views/
 
 - **Nomenclatura**: o arquivo raiz de cada feature termina em `-view.tsx` (ex: `dashboard-view.tsx`, `transactions-view.tsx`)
 - **Uma view por rota**: cada `page.tsx` importa exatamente uma view, que é um Client Component que recebe os dados já buscados pelo Server Component
-- **Sub-componentes de feature ficam aqui**: dialogs, cards e pickers específicos de uma feature vivem na subpasta da view, não em `src/components/`
+- **Sub-componentes de feature ficam aqui**: modais, cards e pickers específicos de uma feature vivem na subpasta da view, não em `src/components/`
 - **Sem comentários de seção**: ao invés de `{/* Seção X */}`, extraia um componente com nome descritivo em arquivo próprio
 - **Constantes compartilhadas**: quando dois sub-componentes precisam do mesmo dado (ex: lista de grupos), extraia para um arquivo `[feature]-constants.ts` na mesma pasta para evitar dependência circular
 - **Sem lógica de busca**: views não fazem fetch — recebem tudo via props do `page.tsx`
+
+## Convenção de nomenclatura: Modal vs Dialog
+
+Neste projeto, componentes de overlay/popup de feature são chamados de **Modal** (não Dialog):
+
+- Arquivos: `[feature]-modal.tsx` (ex: `import-modal.tsx`, `category-modal.tsx`)
+- Componentes: `[Feature]Modal` (ex: `ImportModal`, `CategoryModal`)
+- Stores: `use[Feature]Modal` (ex: `useCategoryModal`, `useRecurringBillModal`)
+
+O primitivo `src/components/ui/dialog.tsx` mantém o nome original (vem do shadcn/base-ui) e é importado internamente pelos modais — não usar o nome "Dialog" em componentes de feature.
 
 ## Diferença de src/components/
 

@@ -16,14 +16,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { RecurringBill } from "@/db/app-schema"
+import { useRecurringBillModal } from "@/stores/recurring-bill-modal"
 import { formatBRL } from "@/utils/format"
-import { useRecurringBillDialog } from "@/stores/recurring-bill-dialog"
 import { RecurringBillCard } from "./recurring-bill-card"
-import { RecurringBillDialog } from "./recurring-bill-dialog"
+import { RecurringBillModal } from "./recurring-bill-modal"
 
 export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
-  const openCreate = useRecurringBillDialog((s) => s.openCreate)
-  const openEdit = useRecurringBillDialog((s) => s.openEdit)
+  const openCreate = useRecurringBillModal((s) => s.openCreate)
+  const openEdit = useRecurringBillModal((s) => s.openEdit)
   const [deleting, setDeleting] = useState<RecurringBill | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
@@ -112,7 +112,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
             group.items.length > 0 && (
               <section key={group.label} className="space-y-3">
                 <h3 className="text-base font-medium text-white">{group.label}</h3>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 lg:grid-cols-5">
                   {group.items
                     .slice()
                     .sort((a, b) => a.dueDay - b.dueDay)
@@ -132,7 +132,7 @@ export function RecurringBillsView({ bills }: { bills: RecurringBill[] }) {
         )
       )}
 
-      <RecurringBillDialog />
+      <RecurringBillModal />
 
       <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
         <DialogContent>

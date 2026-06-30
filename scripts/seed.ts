@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { eq } from "drizzle-orm"
 import Papa from "papaparse"
+import { auth } from "../src/auth/server"
 import { db } from "../src/db"
 import {
   category,
@@ -12,7 +13,6 @@ import {
   transaction,
 } from "../src/db/app-schema"
 import { account, session, user, verification } from "../src/db/auth-schema"
-import { auth } from "../src/auth/server"
 import type { ColumnMapping } from "../src/utils/csv"
 import { detectBankFormat, getAutoMapping, isFlipSign, normalizeRow } from "../src/utils/csv"
 
@@ -106,10 +106,48 @@ async function seedTransactions(userId: string) {
   }
 }
 
+async function seedRecurringBills(userId: string) {
+  console.log("🔁 Inserindo contas recorrentes...")
+
+  const bills = [
+    { name: "Aluguel", amount: 150000, dueDay: 5, essential: true, paymentType: "pix" },
+    { name: "Internet", amount: 9990, dueDay: 10, essential: true, paymentType: "boleto" },
+    { name: "Energia elétrica", amount: 18000, dueDay: 15, essential: true, paymentType: "boleto" },
+    { name: "Água", amount: 6500, dueDay: 20, essential: true, paymentType: "boleto" },
+    {
+      name: "Plano de saúde",
+      amount: 45000,
+      dueDay: 5,
+      essential: true,
+      paymentType: "debit_auto",
+    },
+    { name: "Academia", amount: 9990, dueDay: 1, essential: false, paymentType: "debit_auto" },
+    {
+      name: "Streaming (vídeo)",
+      amount: 4490,
+      dueDay: 18,
+      essential: false,
+      paymentType: "credit",
+    },
+    {
+      name: "Streaming (música)",
+      amount: 2190,
+      dueDay: 22,
+      essential: false,
+      paymentType: "credit",
+    },
+  ]
+
+  await db.insert(recurringBill).values(bills.map((b) => ({ ...b, userId })))
+
+  console.log(`   ${bills.length} contas recorrentes inseridas.\n`)
+}
+
 async function main() {
   await clearDatabase()
   const maria = await createUser()
   await seedTransactions(maria.id)
+  await seedRecurringBills(maria.id)
   console.log("\n✅ Seed concluído.")
 }
 

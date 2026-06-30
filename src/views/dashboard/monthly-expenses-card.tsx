@@ -1,8 +1,8 @@
 import { Line, LineChart, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import type { DashboardData } from "@/views/dashboard/data"
 import { formatBRL } from "@/utils/format"
+import type { DashboardData } from "@/views/dashboard/data"
 
 export function MonthlyExpensesCard({ data }: { data: DashboardData }) {
   return (
@@ -40,9 +40,7 @@ export function MonthlyExpensesCard({ data }: { data: DashboardData }) {
             />
             <ChartTooltip
               cursor={false}
-              content={
-                <ChartTooltipContent formatter={(value) => formatBRL(value as number)} />
-              }
+              content={<ChartTooltipContent formatter={(value) => formatBRL(value as number)} />}
             />
             <Line
               dataKey="total"

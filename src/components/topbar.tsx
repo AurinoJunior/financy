@@ -3,6 +3,7 @@
 import { LogOutIcon } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { signOut } from "@/auth/client"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -12,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { signOut } from "@/auth/client"
 
 type TopbarUser = {
   name?: string | null

@@ -1,7 +1,7 @@
 import { create } from "zustand"
 import type { RecurringBill } from "@/db/app-schema"
 
-type RecurringBillDialogState = {
+type RecurringBillModalState = {
   open: boolean
   editing: RecurringBill | null
   openCreate: () => void
@@ -10,7 +10,7 @@ type RecurringBillDialogState = {
   close: () => void
 }
 
-export const useRecurringBillDialog = create<RecurringBillDialogState>((set) => ({
+export const useRecurringBillModal = create<RecurringBillModalState>((set) => ({
   open: false,
   editing: null,
   openCreate: () => set({ open: true, editing: null }),
