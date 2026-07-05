@@ -8,7 +8,7 @@ Contém os arquivos de construção de páginas e seus sub-componentes de featur
 views/
   dashboard/
     dashboard-view.tsx          # view principal da rota /
-    accounts-overview.tsx
+    financial-summary.tsx       # cards de Entradas / Saídas / Saldo
     category-expenses-card.tsx
     monthly-expenses-card.tsx
     budget-card.tsx
@@ -24,23 +24,19 @@ views/
     categorize-review-modal.tsx # modal de revisão pós-categorização IA
   configuracoes/
     configuracoes-view.tsx      # view principal da rota /configuracoes — compõe as seções abaixo
-  categories/
-    categories-view.tsx         # seção de categorias (sem rota própria)
-    category-modal.tsx
-    delete-category-modal.tsx
-  bank-accounts/
-    bank-accounts-view.tsx      # seção de contas bancárias (sem rota própria)
-    bank-account-modal.tsx
-    bank-card.tsx
+    categories/
+      categories-view.tsx       # seção de categorias (sem rota própria)
+      category-modal.tsx
+      delete-category-modal.tsx
+    financial-plan/
+      financial-planning-view.tsx # seção de planejamento financeiro (sem rota própria)
+      plan-sliders-card.tsx
+      plan-simulation.tsx
+      plan-constants.ts         # GROUPS, GroupKey, DEFAULTS compartilhados entre os sub-componentes
   recurring/
     recurring-bills-view.tsx    # view principal da rota /recorrentes
     recurring-bill-card.tsx
     recurring-bill-modal.tsx
-  financial-plan/
-    financial-planning-view.tsx # seção de planejamento financeiro (sem rota própria)
-    plan-sliders-card.tsx
-    plan-simulation.tsx
-    plan-constants.ts           # GROUPS, GroupKey, DEFAULTS compartilhados entre os sub-componentes
 ```
 
 ## Regras

@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { FilterSelect } from "@/components/ui/filter-select"
 import { ACCOUNT_TYPE_LABELS } from "@/constants/banks"
-import type { BankAccount, Category, Transaction } from "@/db/app-schema"
+import type { Category, Transaction } from "@/db/app-schema"
 import {
   PERIOD_LABELS,
   PERIODS,
@@ -58,11 +58,9 @@ function getPageNumbers(current: number, total: number): (number | "...")[] {
 export function TransactionsView({
   transactions,
   categories,
-  accounts,
 }: {
   transactions: Transaction[]
   categories: Category[]
-  accounts: BankAccount[]
 }) {
   const PAGE_SIZE = 10
 
@@ -187,7 +185,7 @@ export function TransactionsView({
             categories={categories}
             onClose={() => setReviewOpen(false)}
           />
-          <ImportModal accounts={accounts} />
+          <ImportModal />
         </div>
       </div>
 

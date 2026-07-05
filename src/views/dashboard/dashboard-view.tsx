@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { DashboardData } from "@/views/dashboard/data"
-import { AccountsOverview } from "./accounts-overview"
+import { FinancialSummary } from "./financial-summary"
 import { BudgetCard } from "./budget-card"
 import { CategoryExpensesCard } from "./category-expenses-card"
 import { MonthSelector } from "./month-selector"
@@ -36,7 +36,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
         <MonthSelector availableMonths={data.availableMonths} currentMonth={data.currentMonth} />
       </div>
 
-      <AccountsOverview data={data} />
+      <FinancialSummary data={data} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">

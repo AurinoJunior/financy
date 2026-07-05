@@ -1,7 +1,7 @@
-import { asc, desc, eq } from "drizzle-orm"
+import { desc, eq } from "drizzle-orm"
 import { getSession } from "@/auth/session"
 import { db } from "@/db"
-import { bankAccount, category, csvImport, financialPlan, recurringBill, transaction } from "@/db/schema"
+import { category, financialPlan, transaction } from "@/db/schema"
 import { Dashboard } from "@/views/dashboard/dashboard-view"
 import { computeDashboard } from "@/views/dashboard/data"
 
@@ -16,7 +16,7 @@ export default async function DashboardPage({
   const { month } = await searchParams
   const userId = session.user.id
 
-  const [transactions, categories, plans, accounts, csvImports, recurringBills] = await Promise.all([
+  const [transactions, categories, plans] = await Promise.all([
     db
       .select()
       .from(transaction)
@@ -24,19 +24,8 @@ export default async function DashboardPage({
       .orderBy(desc(transaction.date), desc(transaction.createdAt)),
     db.select().from(category).where(eq(category.userId, userId)),
     db.select().from(financialPlan).where(eq(financialPlan.userId, userId)).limit(1),
-    db.select().from(bankAccount).where(eq(bankAccount.userId, userId)).orderBy(asc(bankAccount.createdAt)),
-    db.select().from(csvImport).where(eq(csvImport.userId, userId)),
-    db.select().from(recurringBill).where(eq(recurringBill.userId, userId)),
   ])
 
-  const data = computeDashboard(
-    transactions,
-    categories,
-    accounts,
-    csvImports,
-    recurringBills,
-    month,
-    plans[0] ?? null,
-  )
+  const data = computeDashboard(transactions, categories, month, plans[0] ?? null)
   return <Dashboard data={data} />
 }

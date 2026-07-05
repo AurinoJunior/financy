@@ -6,7 +6,6 @@ import Papa from "papaparse"
 import { auth } from "../src/auth/server"
 import { db } from "../src/db"
 import {
-  bankAccount,
   category,
   csvImport,
   financialPlan,
@@ -27,10 +26,9 @@ type CsvFile = {
   file: string
   bank: string
   accountType: "debit" | "credit"
-  bankAccountId?: string
 }
 
-const CSV_FILE_TEMPLATES: Omit<CsvFile, "bankAccountId">[] = [
+const CSV_FILES: CsvFile[] = [
   { file: "exemplos/nu-debito.csv", bank: "nubank", accountType: "debit" },
   { file: "exemplos/nu-credito.csv", bank: "nubank", accountType: "credit" },
 ]
@@ -47,7 +45,6 @@ async function clearDatabase() {
   await db.delete(csvImport)
   await db.delete(recurringBill)
   await db.delete(financialPlan)
-  await db.delete(bankAccount)
   await db.delete(category)
   await db.delete(account)
   await db.delete(user)
@@ -67,48 +64,10 @@ async function createUser() {
   return maria
 }
 
-async function seedBankAccounts(userId: string): Promise<{ checkingId: string; creditId: string }> {
-  console.log("🏦 Inserindo contas bancárias...")
-
-  const [checking] = await db
-    .insert(bankAccount)
-    .values({
-      userId,
-      name: "Conta Corrente Nubank",
-      type: "checking",
-      bank: "nubank",
-      balance: 380000,
-    })
-    .returning()
-
-  const [credit] = await db
-    .insert(bankAccount)
-    .values({
-      userId,
-      name: "Cartão Nubank",
-      type: "credit",
-      bank: "nubank",
-      balance: 500000,
-      closingDay: 26,
-    })
-    .returning()
-
-  console.log("   2 contas inseridas.\n")
-  return { checkingId: checking.id, creditId: credit.id }
-}
-
-async function seedTransactions(
-  userId: string,
-  accountIds: { checkingId: string; creditId: string },
-) {
+async function seedTransactions(userId: string) {
   console.log("📄 Importando transações...")
 
-  const CSV_FILES: CsvFile[] = [
-    { ...CSV_FILE_TEMPLATES[0], bankAccountId: accountIds.checkingId },
-    { ...CSV_FILE_TEMPLATES[1], bankAccountId: accountIds.creditId },
-  ]
-
-  for (const { file, bank, accountType, bankAccountId } of CSV_FILES) {
+  for (const { file, bank, accountType } of CSV_FILES) {
     const content = readFileSync(resolve(BASE_DIR, file), "utf-8")
     const { data, meta } = Papa.parse<Record<string, string>>(content, {
       header: true,
@@ -130,7 +89,6 @@ async function seedTransactions(
         rowCount: rows.length,
         bank,
         accountType,
-        bankAccountId,
       })
       .returning()
 
@@ -204,8 +162,7 @@ async function seedRecurringBills(userId: string) {
 async function main() {
   await clearDatabase()
   const maria = await createUser()
-  const accountIds = await seedBankAccounts(maria.id)
-  await seedTransactions(maria.id, accountIds)
+  await seedTransactions(maria.id)
   await seedFinancialPlan(maria.id)
   await seedRecurringBills(maria.id)
   console.log("\n✅ Seed concluído.")

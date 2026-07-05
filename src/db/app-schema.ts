@@ -1,4 +1,3 @@
-export * from "./bank-account-schema"
 export * from "./category-schema"
 export * from "./csv-import-schema"
 export * from "./financial-plan-schema"

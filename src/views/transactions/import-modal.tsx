@@ -15,8 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FilterSelect } from "@/components/ui/filter-select"
-import type { AccountType } from "@/constants/banks"
-import type { BankAccount } from "@/db/app-schema"
+import { ACCOUNT_TYPE_LABELS, BANKS, type AccountType } from "@/constants/banks"
 import { cn } from "@/utils/cn"
 import {
   type BankFormat,
@@ -30,9 +29,10 @@ import { formatBRL, formatDateBr } from "@/utils/format"
 
 type RawRow = Record<string, string>
 
-export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
+export function ImportModal() {
   const [open, setOpen] = useState(false)
-  const [accountId, setAccountId] = useState<string>("")
+  const [bank, setBank] = useState("")
+  const [accountType, setAccountType] = useState<AccountType | "">("")
   const [filename, setFilename] = useState("")
   const [headers, setHeaders] = useState<string[]>([])
   const [rows, setRows] = useState<RawRow[]>([])
@@ -43,7 +43,8 @@ export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
   const [submitting, setSubmitting] = useState(false)
 
   function reset() {
-    setAccountId("")
+    setBank("")
+    setAccountType("")
     setFilename("")
     setHeaders([])
     setRows([])
@@ -107,8 +108,7 @@ export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
   }, [validRows])
 
   const ignored = rows.length - validRows.length
-  const selectedAccount = accounts.find((a) => a.id === accountId) ?? null
-  const bankAccountReady = Boolean(accountId && selectedAccount)
+  const bankAccountReady = Boolean(bank && accountType)
   const ready = Boolean(bankAccountReady && validRows.length > 0)
 
   const duplicateSet = useMemo(() => new Set(duplicateIndices ?? []), [duplicateIndices])
@@ -129,9 +129,8 @@ export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
     setSubmitting(true)
     const result = await importTransactions({
       filename,
-      bank: selectedAccount?.bank ?? undefined,
-      accountType: (selectedAccount?.type === "credit" ? "credit" : "debit") as AccountType,
-      bankAccountId: accountId || undefined,
+      bank: bank || undefined,
+      accountType: accountType as AccountType,
       rows: rowsToImport,
     })
     setSubmitting(false)
@@ -164,18 +163,33 @@ export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
           </DialogHeader>
 
           <div className="grid gap-5">
-            <FilterSelect
-              value={accountId}
-              onChange={(v) => {
-                setAccountId(v)
-                setDuplicateIndices(null)
-              }}
-              options={[
-                { value: "", label: accounts.length === 0 ? "Nenhuma conta cadastrada" : "Selecione a conta..." },
-                ...accounts.map((a) => ({ value: a.id, label: a.name })),
-              ]}
-              className="w-full"
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <FilterSelect
+                value={bank}
+                onChange={(v) => {
+                  setBank(v)
+                  setDuplicateIndices(null)
+                }}
+                options={[
+                  { value: "", label: "Banco..." },
+                  ...BANKS.map((b) => ({ value: b.id, label: b.name })),
+                ]}
+                className="w-full"
+              />
+              <FilterSelect
+                value={accountType}
+                onChange={(v) => {
+                  setAccountType(v as AccountType | "")
+                  setDuplicateIndices(null)
+                }}
+                options={[
+                  { value: "", label: "Tipo de conta..." },
+                  { value: "debit", label: ACCOUNT_TYPE_LABELS.debit },
+                  { value: "credit", label: ACCOUNT_TYPE_LABELS.credit },
+                ]}
+                className="w-full"
+              />
+            </div>
 
             {headers.length === 0 ? (
               <label
@@ -188,9 +202,7 @@ export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
                 <span>
                   {bankAccountReady
                     ? "Clique para selecionar um arquivo .csv"
-                    : accounts.length === 0
-                      ? "Cadastre uma conta em Configurações primeiro"
-                      : "Selecione a conta primeiro"}
+                    : "Selecione o banco e o tipo de conta primeiro"}
                 </span>
                 <input
                   type="file"
