@@ -53,16 +53,8 @@ export function CategoriesView({
   }
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-semibold">Contas bancárias</h2>
+    <div className="space-y-12">
       <BankAccountsView accounts={accounts} />
-
-      <div className="flex items-center justify-end gap-4">
-        <Button onClick={openCreate}>
-          <PlusIcon />
-          Nova categoria
-        </Button>
-      </div>
 
       {categories.length === 0 && (
         <Card className="items-center gap-2 py-10 text-center">
@@ -73,7 +65,15 @@ export function CategoriesView({
         </Card>
       )}
 
-      <h2 className="text-2xl font-semibold">Categorias</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Categorias</h2>
+        <div className="flex items-center justify-end gap-4">
+          <Button onClick={openCreate}>
+            <PlusIcon />
+            Nova categoria
+          </Button>
+        </div>
+      </div>
 
       {groups.map(
         ({ type, items }) =>
@@ -119,12 +119,9 @@ export function CategoriesView({
             </section>
           ),
       )}
-
-      <h2 className="text-2xl font-semibold">Planejamento financeiro</h2>
       <FinancialPlanningView plan={plan} />
 
       <CategoryModal />
-
       <DeleteCategoryModal
         category={deleting}
         isDeleting={isDeleting}

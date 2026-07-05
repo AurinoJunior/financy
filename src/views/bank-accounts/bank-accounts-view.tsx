@@ -1,25 +1,16 @@
 "use client"
 
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { PlusIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { deleteBankAccount } from "@/app/(app)/configuracoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import type { BankAccount } from "@/db/app-schema"
 import { useBankAccountModal } from "@/stores/bank-account-modal"
-import { formatBRL } from "@/utils/format"
-import { BANK_ACCOUNT_TYPE_LABELS, type BankAccountType } from "@/validations/bank-account"
-import { BankIcon } from "@/views/transactions/bank-icon"
+import { BankAccountDeleteModal } from "./bank-account-delete-modal"
 import { BankAccountModal } from "./bank-account-modal"
+import { BankCard } from "./bank-card"
 
 export function BankAccountsView({ accounts }: { accounts: BankAccount[] }) {
   const openCreate = useBankAccountModal((s) => s.openCreate)
@@ -46,12 +37,15 @@ export function BankAccountsView({ accounts }: { accounts: BankAccount[] }) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-end">
-        <Button onClick={openCreate}>
-          <PlusIcon />
-          Nova conta
-        </Button>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Contas bancárias</h2>
+        <div className="flex items-center justify-end">
+          <Button onClick={openCreate}>
+            <PlusIcon />
+            Nova conta
+          </Button>
+        </div>
       </div>
 
       {accounts.length === 0 && (
@@ -65,99 +59,33 @@ export function BankAccountsView({ accounts }: { accounts: BankAccount[] }) {
         </Card>
       )}
 
-      {checkingAccounts.length > 0 && (
-        <AccountGroup
-          label="Contas correntes"
-          accounts={checkingAccounts}
-          onEdit={openEdit}
-          onDelete={setDeleting}
-        />
-      )}
+      <div className="flex gap-4">
+        {checkingAccounts.length > 0 && (
+          <BankCard
+            label="Contas correntes"
+            accounts={checkingAccounts}
+            onEdit={openEdit}
+            onDelete={setDeleting}
+          />
+        )}
 
-      {creditAccounts.length > 0 && (
-        <AccountGroup
-          label="Cartões de crédito"
-          accounts={creditAccounts}
-          onEdit={openEdit}
-          onDelete={setDeleting}
-        />
-      )}
+        {creditAccounts.length > 0 && (
+          <BankCard
+            label="Cartões de crédito"
+            accounts={creditAccounts}
+            onEdit={openEdit}
+            onDelete={setDeleting}
+          />
+        )}
+      </div>
 
       <BankAccountModal />
-
-      <Dialog open={!!deleting} onOpenChange={(open) => !open && setDeleting(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Excluir conta</DialogTitle>
-            <DialogDescription>
-              Tem certeza que deseja excluir{" "}
-              <span className="font-medium text-foreground">{deleting?.name}</span>? Esta ação não
-              pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleting(null)} disabled={isDeleting}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting}>
-              {isDeleting ? "Excluindo..." : "Excluir"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BankAccountDeleteModal
+        deleting={deleting}
+        isDeleting={isDeleting}
+        onClose={() => setDeleting(null)}
+        confirmDelete={confirmDelete}
+      />
     </div>
-  )
-}
-
-function AccountGroup({
-  label,
-  accounts,
-  onEdit,
-  onDelete,
-}: {
-  label: string
-  accounts: BankAccount[]
-  onEdit: (a: BankAccount) => void
-  onDelete: (a: BankAccount) => void
-}) {
-  return (
-    <section className="space-y-3">
-      <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</h3>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {accounts.map((account) => (
-          <Card key={account.id} className="group flex-row items-center gap-3 px-4 py-3">
-            <BankIcon bank={account.bank} size={36} />
-            <div className="flex-1 min-w-0">
-              <p className="truncate font-medium">{account.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {BANK_ACCOUNT_TYPE_LABELS[account.type as BankAccountType]}
-                {" · "}
-                {account.type === "credit"
-                  ? `Limite ${formatBRL(account.balance)}`
-                  : formatBRL(account.balance)}
-              </p>
-            </div>
-            <div className="flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Editar"
-                onClick={() => onEdit(account)}
-              >
-                <PencilIcon />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Excluir"
-                onClick={() => onDelete(account)}
-              >
-                <Trash2Icon />
-              </Button>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </section>
   )
 }

@@ -25,8 +25,8 @@ import { cn } from "@/utils/cn"
 import { parseBrAmount } from "@/utils/csv"
 import { maskCurrencyInput } from "@/utils/format"
 import {
-  BANK_ACCOUNT_TYPES,
   BANK_ACCOUNT_TYPE_LABELS,
+  BANK_ACCOUNT_TYPES,
   type BankAccountType,
 } from "@/validations/bank-account"
 
@@ -133,7 +133,9 @@ export function BankAccountModal() {
         <DialogHeader>
           <DialogTitle>{editing ? "Editar conta" : "Nova conta bancária"}</DialogTitle>
           <DialogDescription>
-            {editing ? "Atualize os dados da conta." : "Cadastre uma conta para acompanhar seu saldo."}
+            {editing
+              ? "Atualize os dados da conta."
+              : "Cadastre uma conta para acompanhar seu saldo."}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,7 +178,9 @@ export function BankAccountModal() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="balance">{type === "credit" ? "Limite (R$)" : "Saldo atual (R$)"}</Label>
+              <Label htmlFor="balance">
+                {type === "credit" ? "Limite (R$)" : "Saldo atual (R$)"}
+              </Label>
               <Input
                 id="balance"
                 inputMode="numeric"
