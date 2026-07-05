@@ -6,6 +6,7 @@ import Papa from "papaparse"
 import { auth } from "../src/auth/server"
 import { db } from "../src/db"
 import {
+  bankAccount,
   category,
   csvImport,
   financialPlan,
@@ -22,9 +23,16 @@ const SEED_NAME = "Maria"
 
 const BASE_DIR = resolve(new URL(".", import.meta.url).pathname, "..")
 
-const CSV_FILES = [
-  { file: "exemplos/nu-debito.csv", bank: "nubank", accountType: "debit" as const },
-  { file: "exemplos/nu-credito.csv", bank: "nubank", accountType: "credit" as const },
+type CsvFile = {
+  file: string
+  bank: string
+  accountType: "debit" | "credit"
+  bankAccountId?: string
+}
+
+const CSV_FILE_TEMPLATES: Omit<CsvFile, "bankAccountId">[] = [
+  { file: "exemplos/nu-debito.csv", bank: "nubank", accountType: "debit" },
+  { file: "exemplos/nu-credito.csv", bank: "nubank", accountType: "credit" },
 ]
 
 function hash(date: string, amount: number, description: string) {
@@ -39,6 +47,7 @@ async function clearDatabase() {
   await db.delete(csvImport)
   await db.delete(recurringBill)
   await db.delete(financialPlan)
+  await db.delete(bankAccount)
   await db.delete(category)
   await db.delete(account)
   await db.delete(user)
@@ -58,10 +67,48 @@ async function createUser() {
   return maria
 }
 
-async function seedTransactions(userId: string) {
+async function seedBankAccounts(userId: string): Promise<{ checkingId: string; creditId: string }> {
+  console.log("🏦 Inserindo contas bancárias...")
+
+  const [checking] = await db
+    .insert(bankAccount)
+    .values({
+      userId,
+      name: "Conta Corrente Nubank",
+      type: "checking",
+      bank: "nubank",
+      balance: 380000,
+    })
+    .returning()
+
+  const [credit] = await db
+    .insert(bankAccount)
+    .values({
+      userId,
+      name: "Cartão Nubank",
+      type: "credit",
+      bank: "nubank",
+      balance: 500000,
+      closingDay: 26,
+    })
+    .returning()
+
+  console.log("   2 contas inseridas.\n")
+  return { checkingId: checking.id, creditId: credit.id }
+}
+
+async function seedTransactions(
+  userId: string,
+  accountIds: { checkingId: string; creditId: string },
+) {
   console.log("📄 Importando transações...")
 
-  for (const { file, bank, accountType } of CSV_FILES) {
+  const CSV_FILES: CsvFile[] = [
+    { ...CSV_FILE_TEMPLATES[0], bankAccountId: accountIds.checkingId },
+    { ...CSV_FILE_TEMPLATES[1], bankAccountId: accountIds.creditId },
+  ]
+
+  for (const { file, bank, accountType, bankAccountId } of CSV_FILES) {
     const content = readFileSync(resolve(BASE_DIR, file), "utf-8")
     const { data, meta } = Papa.parse<Record<string, string>>(content, {
       header: true,
@@ -83,6 +130,7 @@ async function seedTransactions(userId: string) {
         rowCount: rows.length,
         bank,
         accountType,
+        bankAccountId,
       })
       .returning()
 
@@ -104,6 +152,16 @@ async function seedTransactions(userId: string) {
 
     console.log(`   ${file}: ${rows.length} transações (${accountType})`)
   }
+}
+
+async function seedFinancialPlan(userId: string) {
+  await db.insert(financialPlan).values({
+    userId,
+    simulationIncome: 750000, // R$ 7.500
+    essentialPct: 50,
+    nonEssentialPct: 30,
+    patrimonyPct: 20,
+  })
 }
 
 async function seedRecurringBills(userId: string) {
@@ -146,7 +204,9 @@ async function seedRecurringBills(userId: string) {
 async function main() {
   await clearDatabase()
   const maria = await createUser()
-  await seedTransactions(maria.id)
+  const accountIds = await seedBankAccounts(maria.id)
+  await seedTransactions(maria.id, accountIds)
+  await seedFinancialPlan(maria.id)
   await seedRecurringBills(maria.id)
   console.log("\n✅ Seed concluído.")
 }

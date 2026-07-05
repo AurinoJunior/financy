@@ -1,13 +1,13 @@
 import { asc, eq } from "drizzle-orm"
 import { getSession } from "@/auth/session"
 import { db } from "@/db"
-import { category, financialPlan } from "@/db/schema"
+import { bankAccount, category, financialPlan } from "@/db/schema"
 import { CategoriesView } from "@/views/categories/categories-view"
 
 export default async function ConfiguracoesPage() {
   const session = await getSession()
 
-  const [categories, plans] = session
+  const [categories, plans, accounts] = session
     ? await Promise.all([
         db
           .select()
@@ -15,8 +15,13 @@ export default async function ConfiguracoesPage() {
           .where(eq(category.userId, session.user.id))
           .orderBy(asc(category.type), asc(category.name)),
         db.select().from(financialPlan).where(eq(financialPlan.userId, session.user.id)).limit(1),
+        db
+          .select()
+          .from(bankAccount)
+          .where(eq(bankAccount.userId, session.user.id))
+          .orderBy(asc(bankAccount.createdAt)),
       ])
-    : [[], []]
+    : [[], [], []]
 
-  return <CategoriesView categories={categories} plan={plans[0] ?? null} />
+  return <CategoriesView categories={categories} plan={plans[0] ?? null} accounts={accounts} />
 }

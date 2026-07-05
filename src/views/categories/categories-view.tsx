@@ -7,8 +7,9 @@ import { deleteCategory } from "@/app/(app)/configuracoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CATEGORY_TYPE_LABELS, getCategoryIcon } from "@/constants/categories"
-import type { Category, FinancialPlan } from "@/db/app-schema"
+import type { BankAccount, Category, FinancialPlan } from "@/db/app-schema"
 import { useCategoryModal } from "@/stores/category-modal"
+import { BankAccountsView } from "@/views/bank-accounts/bank-accounts-view"
 import { FinancialPlanningView } from "@/views/financial-plan/financial-planning-view"
 import { CategoryModal } from "./category-modal"
 import { DeleteCategoryModal } from "./delete-category-modal"
@@ -16,9 +17,11 @@ import { DeleteCategoryModal } from "./delete-category-modal"
 export function CategoriesView({
   categories,
   plan,
+  accounts,
 }: {
   categories: Category[]
   plan: FinancialPlan | null
+  accounts: BankAccount[]
 }) {
   const openCreate = useCategoryModal((s) => s.openCreate)
   const openEdit = useCategoryModal((s) => s.openEdit)
@@ -51,6 +54,9 @@ export function CategoriesView({
 
   return (
     <div className="space-y-8">
+      <h2 className="text-2xl font-semibold">Contas bancárias</h2>
+      <BankAccountsView accounts={accounts} />
+
       <div className="flex items-center justify-end gap-4">
         <Button onClick={openCreate}>
           <PlusIcon />

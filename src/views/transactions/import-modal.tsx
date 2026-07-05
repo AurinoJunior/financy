@@ -15,7 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FilterSelect } from "@/components/ui/filter-select"
-import { type AccountType, BANKS } from "@/constants/banks"
+import type { AccountType } from "@/constants/banks"
+import type { BankAccount } from "@/db/app-schema"
 import { cn } from "@/utils/cn"
 import {
   type BankFormat,
@@ -29,15 +30,9 @@ import { formatBRL, formatDateBr } from "@/utils/format"
 
 type RawRow = Record<string, string>
 
-const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string }[] = [
-  { value: "debit", label: "Débito" },
-  { value: "credit", label: "Crédito" },
-]
-
-export function ImportModal() {
+export function ImportModal({ accounts }: { accounts: BankAccount[] }) {
   const [open, setOpen] = useState(false)
-  const [bank, setBank] = useState<string>("")
-  const [accountType, setAccountType] = useState<AccountType | "">("")
+  const [accountId, setAccountId] = useState<string>("")
   const [filename, setFilename] = useState("")
   const [headers, setHeaders] = useState<string[]>([])
   const [rows, setRows] = useState<RawRow[]>([])
@@ -48,8 +43,7 @@ export function ImportModal() {
   const [submitting, setSubmitting] = useState(false)
 
   function reset() {
-    setBank("")
-    setAccountType("")
+    setAccountId("")
     setFilename("")
     setHeaders([])
     setRows([])
@@ -113,7 +107,8 @@ export function ImportModal() {
   }, [validRows])
 
   const ignored = rows.length - validRows.length
-  const bankAccountReady = Boolean(bank && accountType)
+  const selectedAccount = accounts.find((a) => a.id === accountId) ?? null
+  const bankAccountReady = Boolean(accountId && selectedAccount)
   const ready = Boolean(bankAccountReady && validRows.length > 0)
 
   const duplicateSet = useMemo(() => new Set(duplicateIndices ?? []), [duplicateIndices])
@@ -134,8 +129,9 @@ export function ImportModal() {
     setSubmitting(true)
     const result = await importTransactions({
       filename,
-      bank: bank || undefined,
-      accountType: (accountType as AccountType) || undefined,
+      bank: selectedAccount?.bank ?? undefined,
+      accountType: (selectedAccount?.type === "credit" ? "credit" : "debit") as AccountType,
+      bankAccountId: accountId || undefined,
       rows: rowsToImport,
     })
     setSubmitting(false)
@@ -168,23 +164,18 @@ export function ImportModal() {
           </DialogHeader>
 
           <div className="grid gap-5">
-            <div className="grid grid-cols-2 gap-3">
-              <FilterSelect
-                value={bank}
-                onChange={setBank}
-                options={[
-                  { value: "", label: "Banco" },
-                  ...BANKS.map((b) => ({ value: b.id, label: b.name })),
-                ]}
-                className="w-full"
-              />
-              <FilterSelect
-                value={accountType}
-                onChange={(v) => setAccountType(v as AccountType | "")}
-                options={[{ value: "", label: "Tipo de extrato" }, ...ACCOUNT_TYPE_OPTIONS]}
-                className="w-full"
-              />
-            </div>
+            <FilterSelect
+              value={accountId}
+              onChange={(v) => {
+                setAccountId(v)
+                setDuplicateIndices(null)
+              }}
+              options={[
+                { value: "", label: accounts.length === 0 ? "Nenhuma conta cadastrada" : "Selecione a conta..." },
+                ...accounts.map((a) => ({ value: a.id, label: a.name })),
+              ]}
+              className="w-full"
+            />
 
             {headers.length === 0 ? (
               <label
@@ -197,7 +188,9 @@ export function ImportModal() {
                 <span>
                   {bankAccountReady
                     ? "Clique para selecionar um arquivo .csv"
-                    : "Selecione o banco e o tipo primeiro"}
+                    : accounts.length === 0
+                      ? "Cadastre uma conta em Configurações primeiro"
+                      : "Selecione a conta primeiro"}
                 </span>
                 <input
                   type="file"

@@ -1,5 +1,6 @@
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import { user } from "./auth-schema"
+import { bankAccount } from "./bank-account-schema"
 
 export const csvImport = pgTable("csv_import", {
   id: text("id")
@@ -12,6 +13,9 @@ export const csvImport = pgTable("csv_import", {
   rowCount: integer("row_count").notNull().default(0),
   bank: text("bank"), // e.g. 'nubank'
   accountType: text("account_type"), // 'credit' | 'debit'
+  bankAccountId: text("bank_account_id").references(() => bankAccount.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

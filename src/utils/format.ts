@@ -26,3 +26,17 @@ export function formatDateBr(iso: string): string {
   const [y, m, d] = iso.split("-")
   return `${d}/${m}/${y}`
 }
+
+/** Date → "agora mesmo", "há Xmin", "há Xh", "há X dias", ou "dd/mm" se > 30 dias. */
+export function formatRelativeTime(date: Date): string {
+  const diffMs = Date.now() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60_000)
+  if (diffMins < 1) return "agora mesmo"
+  if (diffMins < 60) return `há ${diffMins} min`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `há ${diffHours}h`
+  const diffDays = Math.floor(diffHours / 24)
+  if (diffDays === 1) return "há 1 dia"
+  if (diffDays < 30) return `há ${diffDays} dias`
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
+}
