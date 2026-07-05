@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import type { BankAccount } from "@/db/bank-account-schema"
 import { formatBRL } from "@/utils/format"
-import { BankIcon } from "../transactions/bank-icon"
+import { BankIcon } from "@/views/transactions/bank-icon"
 
 export function BankCard({
   accounts,
