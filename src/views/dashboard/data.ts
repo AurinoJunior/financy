@@ -52,20 +52,26 @@ export function computeDashboard(
   plan?: FinancialPlan | null,
 ): DashboardData {
   const now = new Date()
-  const defaultKey = monthKey(now)
-  const currentMonth = selectedMonth ?? defaultKey
-
-  const [year, month] = currentMonth.split("-").map(Number)
-  const currentDate = new Date(year, month - 1, 1)
-  const monthLabel = currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
+  const calendarKey = monthKey(now)
 
   const availableMonths = [...new Set(transactions.map((t) => t.date.substring(0, 7)))]
     .sort()
     .reverse()
 
+  // Default to most recent month with data so the dashboard isn't blank when
+  // the current calendar month has no imported transactions yet.
+  const smartDefault = availableMonths.includes(calendarKey)
+    ? calendarKey
+    : (availableMonths[0] ?? calendarKey)
+  const currentMonth = selectedMonth ?? smartDefault
+
   if (!availableMonths.includes(currentMonth) && availableMonths.length > 0) {
     availableMonths.unshift(currentMonth)
   }
+
+  const [year, month] = currentMonth.split("-").map(Number)
+  const currentDate = new Date(year, month - 1, 1)
+  const monthLabel = currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })
 
   const categoryById = new Map(categories.map((c) => [c.id, c]))
   const monthTx = transactions.filter((t) => t.date.startsWith(currentMonth))

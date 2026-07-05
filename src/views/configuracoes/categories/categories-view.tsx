@@ -7,19 +7,12 @@ import { deleteCategory } from "@/app/(app)/configuracoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CATEGORY_TYPE_LABELS, getCategoryIcon } from "@/constants/categories"
-import type { Category, FinancialPlan } from "@/db/app-schema"
+import type { Category } from "@/db/app-schema"
 import { useCategoryModal } from "@/stores/category-modal"
-import { FinancialPlanningView } from "@/views/financial-plan/financial-planning-view"
 import { CategoryModal } from "./category-modal"
 import { DeleteCategoryModal } from "./delete-category-modal"
 
-export function CategoriesView({
-  categories,
-  plan,
-}: {
-  categories: Category[]
-  plan: FinancialPlan | null
-}) {
+export function CategoriesView({ categories }: { categories: Category[] }) {
   const openCreate = useCategoryModal((s) => s.openCreate)
   const openEdit = useCategoryModal((s) => s.openEdit)
   const [deleting, setDeleting] = useState<Category | null>(null)
@@ -51,7 +44,8 @@ export function CategoriesView({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-end gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Categorias</h2>
         <Button onClick={openCreate}>
           <PlusIcon />
           Nova categoria
@@ -66,8 +60,6 @@ export function CategoriesView({
           </Button>
         </Card>
       )}
-
-      <h2 className="text-2xl font-semibold">Categorias</h2>
 
       {groups.map(
         ({ type, items }) =>
@@ -114,11 +106,7 @@ export function CategoriesView({
           ),
       )}
 
-      <h2 className="text-2xl font-semibold">Planejamento financeiro</h2>
-      <FinancialPlanningView plan={plan} />
-
       <CategoryModal />
-
       <DeleteCategoryModal
         category={deleting}
         isDeleting={isDeleting}

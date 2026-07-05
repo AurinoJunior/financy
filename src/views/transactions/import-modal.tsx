@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FilterSelect } from "@/components/ui/filter-select"
-import { type AccountType, BANKS } from "@/constants/banks"
+import { ACCOUNT_TYPE_LABELS, BANKS, type AccountType } from "@/constants/banks"
 import { cn } from "@/utils/cn"
 import {
   type BankFormat,
@@ -29,14 +29,9 @@ import { formatBRL, formatDateBr } from "@/utils/format"
 
 type RawRow = Record<string, string>
 
-const ACCOUNT_TYPE_OPTIONS: { value: AccountType; label: string }[] = [
-  { value: "debit", label: "Débito" },
-  { value: "credit", label: "Crédito" },
-]
-
 export function ImportModal() {
   const [open, setOpen] = useState(false)
-  const [bank, setBank] = useState<string>("")
+  const [bank, setBank] = useState("")
   const [accountType, setAccountType] = useState<AccountType | "">("")
   const [filename, setFilename] = useState("")
   const [headers, setHeaders] = useState<string[]>([])
@@ -135,7 +130,7 @@ export function ImportModal() {
     const result = await importTransactions({
       filename,
       bank: bank || undefined,
-      accountType: (accountType as AccountType) || undefined,
+      accountType: accountType as AccountType,
       rows: rowsToImport,
     })
     setSubmitting(false)
@@ -171,17 +166,27 @@ export function ImportModal() {
             <div className="grid grid-cols-2 gap-3">
               <FilterSelect
                 value={bank}
-                onChange={setBank}
+                onChange={(v) => {
+                  setBank(v)
+                  setDuplicateIndices(null)
+                }}
                 options={[
-                  { value: "", label: "Banco" },
+                  { value: "", label: "Banco..." },
                   ...BANKS.map((b) => ({ value: b.id, label: b.name })),
                 ]}
                 className="w-full"
               />
               <FilterSelect
                 value={accountType}
-                onChange={(v) => setAccountType(v as AccountType | "")}
-                options={[{ value: "", label: "Tipo de extrato" }, ...ACCOUNT_TYPE_OPTIONS]}
+                onChange={(v) => {
+                  setAccountType(v as AccountType | "")
+                  setDuplicateIndices(null)
+                }}
+                options={[
+                  { value: "", label: "Tipo de conta..." },
+                  { value: "debit", label: ACCOUNT_TYPE_LABELS.debit },
+                  { value: "credit", label: ACCOUNT_TYPE_LABELS.credit },
+                ]}
                 className="w-full"
               />
             </div>
@@ -197,7 +202,7 @@ export function ImportModal() {
                 <span>
                   {bankAccountReady
                     ? "Clique para selecionar um arquivo .csv"
-                    : "Selecione o banco e o tipo primeiro"}
+                    : "Selecione o banco e o tipo de conta primeiro"}
                 </span>
                 <input
                   type="file"

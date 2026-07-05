@@ -22,9 +22,15 @@ const SEED_NAME = "Maria"
 
 const BASE_DIR = resolve(new URL(".", import.meta.url).pathname, "..")
 
-const CSV_FILES = [
-  { file: "exemplos/nu-debito.csv", bank: "nubank", accountType: "debit" as const },
-  { file: "exemplos/nu-credito.csv", bank: "nubank", accountType: "credit" as const },
+type CsvFile = {
+  file: string
+  bank: string
+  accountType: "debit" | "credit"
+}
+
+const CSV_FILES: CsvFile[] = [
+  { file: "exemplos/nu-debito.csv", bank: "nubank", accountType: "debit" },
+  { file: "exemplos/nu-credito.csv", bank: "nubank", accountType: "credit" },
 ]
 
 function hash(date: string, amount: number, description: string) {
@@ -106,6 +112,16 @@ async function seedTransactions(userId: string) {
   }
 }
 
+async function seedFinancialPlan(userId: string) {
+  await db.insert(financialPlan).values({
+    userId,
+    simulationIncome: 750000, // R$ 7.500
+    essentialPct: 50,
+    nonEssentialPct: 30,
+    patrimonyPct: 20,
+  })
+}
+
 async function seedRecurringBills(userId: string) {
   console.log("🔁 Inserindo contas recorrentes...")
 
@@ -147,6 +163,7 @@ async function main() {
   await clearDatabase()
   const maria = await createUser()
   await seedTransactions(maria.id)
+  await seedFinancialPlan(maria.id)
   await seedRecurringBills(maria.id)
   console.log("\n✅ Seed concluído.")
 }

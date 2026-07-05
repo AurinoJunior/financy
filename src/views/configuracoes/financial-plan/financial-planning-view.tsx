@@ -47,24 +47,27 @@ export function FinancialPlanningView({ plan }: { plan: FinancialPlan | null }) 
   }
 
   return (
-    <div className="flex gap-4">
-      <PlanSlidersCard
-        values={values}
-        income={income}
-        isValid={isValid}
-        saving={saving}
-        onIncomeChange={setIncome}
-        onGroupChange={setGroup}
-        onReset={() => setValues({ ...DEFAULTS })}
-        onSave={handleSave}
-      />
-      <PlanSimulation
-        values={values}
-        incomeCents={incomeCents}
-        total={total}
-        isValid={isValid}
-        diff={diff}
-      />
+    <div>
+      <h2 className="text-2xl font-semibold mb-8">Planejamento financeiro</h2>
+      <div className="flex gap-4">
+        <PlanSlidersCard
+          values={values}
+          income={income}
+          isValid={isValid}
+          saving={saving}
+          onIncomeChange={setIncome}
+          onGroupChange={setGroup}
+          onReset={() => setValues({ ...DEFAULTS })}
+          onSave={handleSave}
+        />
+        <PlanSimulation
+          values={values}
+          incomeCents={incomeCents}
+          total={total}
+          isValid={isValid}
+          diff={diff}
+        />
+      </div>
     </div>
   )
 }
