@@ -7,22 +7,12 @@ import { deleteCategory } from "@/app/(app)/configuracoes/actions"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CATEGORY_TYPE_LABELS, getCategoryIcon } from "@/constants/categories"
-import type { BankAccount, Category, FinancialPlan } from "@/db/app-schema"
+import type { Category } from "@/db/app-schema"
 import { useCategoryModal } from "@/stores/category-modal"
-import { BankAccountsView } from "@/views/bank-accounts/bank-accounts-view"
-import { FinancialPlanningView } from "@/views/financial-plan/financial-planning-view"
 import { CategoryModal } from "./category-modal"
 import { DeleteCategoryModal } from "./delete-category-modal"
 
-export function CategoriesView({
-  categories,
-  plan,
-  accounts,
-}: {
-  categories: Category[]
-  plan: FinancialPlan | null
-  accounts: BankAccount[]
-}) {
+export function CategoriesView({ categories }: { categories: Category[] }) {
   const openCreate = useCategoryModal((s) => s.openCreate)
   const openEdit = useCategoryModal((s) => s.openEdit)
   const [deleting, setDeleting] = useState<Category | null>(null)
@@ -53,8 +43,14 @@ export function CategoriesView({
   }
 
   return (
-    <div className="space-y-12">
-      <BankAccountsView accounts={accounts} />
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Categorias</h2>
+        <Button onClick={openCreate}>
+          <PlusIcon />
+          Nova categoria
+        </Button>
+      </div>
 
       {categories.length === 0 && (
         <Card className="items-center gap-2 py-10 text-center">
@@ -64,16 +60,6 @@ export function CategoriesView({
           </Button>
         </Card>
       )}
-
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Categorias</h2>
-        <div className="flex items-center justify-end gap-4">
-          <Button onClick={openCreate}>
-            <PlusIcon />
-            Nova categoria
-          </Button>
-        </div>
-      </div>
 
       {groups.map(
         ({ type, items }) =>
@@ -119,7 +105,6 @@ export function CategoriesView({
             </section>
           ),
       )}
-      <FinancialPlanningView plan={plan} />
 
       <CategoryModal />
       <DeleteCategoryModal

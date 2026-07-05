@@ -2,7 +2,7 @@ import { asc, eq } from "drizzle-orm"
 import { getSession } from "@/auth/session"
 import { db } from "@/db"
 import { bankAccount, category, financialPlan } from "@/db/schema"
-import { CategoriesView } from "@/views/categories/categories-view"
+import { ConfiguracoesView } from "@/views/configuracoes/configuracoes-view"
 
 export default async function ConfiguracoesPage() {
   const session = await getSession()
@@ -23,5 +23,5 @@ export default async function ConfiguracoesPage() {
       ])
     : [[], [], []]
 
-  return <CategoriesView categories={categories} plan={plans[0] ?? null} accounts={accounts} />
+  return <ConfiguracoesView categories={categories} plan={plans[0] ?? null} accounts={accounts} />
 }
